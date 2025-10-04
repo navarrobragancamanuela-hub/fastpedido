@@ -1,75 +1,571 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastPedido - Novo Pedido</title>
+    <title>Criar Novo Pedido - FastPedido</title>
+    
+    <!-- Meta tags para SEO e acessibilidade -->
+    <meta name="description" content="Crie novos pedidos de forma rápida e eficiente no FastPedido">
+    <meta name="keywords" content="criar pedido, lanchonete, restaurante, fastfood">
+    
+    <!-- Preload de recursos críticos -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="css/style.css" as="style">
+    
+    <!-- CDN de dependências -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- CSS personalizado -->
     <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+    <!-- Skip link para acessibilidade -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
     <div class="container">
-        <header>
-            <h1><i class="fas fa-hamburger"></i> FastPedido</h1>
-            <p class="subtitle">Criar novo pedido</p>
+        <!-- Cabeçalho -->
+        <header class="header" role="banner">
+            <div class="header__content">
+                <div class="logo">
+                    <i class="fas fa-hamburger logo__icon" aria-hidden="true"></i>
+                    <h1 class="header__title">
+                        FastPedido
+                    </h1>
+                </div>
+                
+                <p class="subtitle">
+                    Criar novo pedido
+                </p>
+                
+                <!-- Breadcrumb -->
+                <nav class="breadcrumb" aria-label="Navegação estrutural">
+                    <ol class="breadcrumb__list">
+                        <li class="breadcrumb__item">
+                            <a href="index.html" class="breadcrumb__link">Pedidos</a>
+                        </li>
+                        <li class="breadcrumb__item" aria-current="page">
+                            Novo Pedido
+                        </li>
+                    </ol>
+                </nav>
+            </div>
         </header>
 
-        <nav class="main-nav">
-            <a href="index.html" class="nav-link">
-                <i class="fas fa-list"></i> Pedidos
-            </a>
-            <a href="produtos.html" class="nav-link">
-                <i class="fas fa-utensils"></i> Produtos
-            </a>
-            <a href="novo-pedido.html" class="nav-link active">
-                <i class="fas fa-plus-circle"></i> Novo Pedido
-            </a>
+        <!-- Navegação principal -->
+        <nav class="nav" role="navigation" aria-label="Navegação principal">
+            <ul class="nav__list" role="menubar">
+                <li class="nav__item" role="none">
+                    <a href="index.html" class="nav__link" role="menuitem">
+                        <i class="fas fa-list nav__icon" aria-hidden="true"></i>
+                        <span class="nav__text">Pedidos</span>
+                    </a>
+                </li>
+                <li class="nav__item" role="none">
+                    <a href="produtos.html" class="nav__link" role="menuitem">
+                        <i class="fas fa-utensils nav__icon" aria-hidden="true"></i>
+                        <span class="nav__text">Produtos</span>
+                    </a>
+                </li>
+                <li class="nav__item" role="none">
+                    <a href="novo-pedido.html" class="nav__link nav__link--active" role="menuitem" aria-current="page">
+                        <i class="fas fa-plus-circle nav__icon" aria-hidden="true"></i>
+                        <span class="nav__text">Novo Pedido</span>
+                    </a>
+                </li>
+            </ul>
         </nav>
 
-        <div class="card">
-            <h2 class="card-title"><i class="fas fa-plus-circle"></i> Novo Pedido</h2>
-            
-            <form id="form-pedido">
-                <div class="form-group">
-                    <label for="cliente"><i class="fas fa-user"></i> Nome do Cliente *</label>
-                    <input type="text" id="cliente" required placeholder="Digite o nome do cliente">
-                </div>
-
-                <div class="form-group">
-                    <label for="status"><i class="fas fa-tag"></i> Status *</label>
-                    <select id="status" required>
-                        <option value="Em preparo">Em preparo</option>
-                        <option value="Pronto">Pronto</option>
-                        <option value="Entregue">Entregue</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label><i class="fas fa-utensils"></i> Itens do Pedido *</label>
-                    <div id="itens-container">
-                        <!-- Itens serão adicionados aqui pelo JavaScript -->
+        <!-- Conteúdo principal -->
+        <main id="main-content" class="main" role="main">
+            <!-- Cartão do formulário -->
+            <section class="card" aria-labelledby="form-title">
+                <div class="card__header">
+                    <h2 class="card__title" id="form-title">
+                        <i class="fas fa-plus-circle card__icon" aria-hidden="true"></i>
+                        Novo Pedido
+                    </h2>
+                    
+                    <!-- Indicador de progresso -->
+                    <div class="form-progress" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                        <div class="form-progress__bar">
+                            <div class="form-progress__fill" id="progress-fill"></div>
+                        </div>
+                        <span class="form-progress__text" id="progress-text">0% completo</span>
                     </div>
-                    <button type="button" class="btn btn-primary" onclick="adicionarItem()" style="margin-top: 10px;">
-                        <i class="fas fa-plus"></i> Adicionar Item
-                    </button>
                 </div>
 
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">
-                        <i class="fas fa-times"></i> Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="submit-btn">
-                        <i class="fas fa-save"></i> Criar Pedido
-                    </button>
-                </div>
-            </form>
-        </div>
+                <form id="form-pedido" class="pedido-form" novalidate>
+                    <!-- Informações do Cliente -->
+                    <fieldset class="form-section">
+                        <legend class="form-section__title">
+                            <i class="fas fa-user form-section__icon" aria-hidden="true"></i>
+                            Informações do Cliente
+                        </legend>
+                        
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label for="cliente" class="form-label">
+                                    Nome do Cliente *
+                                </label>
+                                <input type="text" 
+                                       id="cliente" 
+                                       name="cliente"
+                                       class="form-control" 
+                                       required 
+                                       placeholder="Digite o nome completo do cliente"
+                                       aria-describedby="cliente-help"
+                                       maxlength="100">
+                                <div id="cliente-help" class="form-help">
+                                    Nome completo do cliente para identificação
+                                </div>
+                                <div class="form-feedback" id="cliente-feedback" aria-live="polite"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="telefone" class="form-label">
+                                    Telefone (Opcional)
+                                </label>
+                                <input type="tel" 
+                                       id="telefone" 
+                                       name="telefone"
+                                       class="form-control" 
+                                       placeholder="(11) 99999-9999"
+                                       pattern="\([0-9]{2}\) [0-9]{5}-[0-9]{4}"
+                                       aria-describedby="telefone-help">
+                                <div id="telefone-help" class="form-help">
+                                    Formato: (11) 99999-9999
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
 
-        <div id="message-area"></div>
+                    <!-- Status do Pedido -->
+                    <fieldset class="form-section">
+                        <legend class="form-section__title">
+                            <i class="fas fa-tag form-section__icon" aria-hidden="true"></i>
+                            Status do Pedido
+                        </legend>
+                        
+                        <div class="form-group">
+                            <label for="status" class="form-label">
+                                Status do Pedido *
+                            </label>
+                            <select id="status" 
+                                    name="status"
+                                    class="form-control" 
+                                    required
+                                    aria-describedby="status-help">
+                                <option value="">Selecione um status</option>
+                                <option value="Em preparo" selected>Em preparo</option>
+                                <option value="Pronto">Pronto</option>
+                                <option value="Entregue">Entregue</option>
+                            </select>
+                            <div id="status-help" class="form-help">
+                                Defina o status atual do pedido
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Itens do Pedido -->
+                    <fieldset class="form-section" id="itens-section">
+                        <legend class="form-section__title">
+                            <i class="fas fa-utensils form-section__icon" aria-hidden="true"></i>
+                            Itens do Pedido
+                            <span class="badge badge--primary" id="itens-count">0 itens</span>
+                        </legend>
+                        
+                        <div class="form-help mb-lg">
+                            Adicione os produtos que compõem este pedido. Você pode adicionar múltiplos itens.
+                        </div>
+
+                        <!-- Container de itens -->
+                        <div id="itens-container" class="itens-container" role="list" aria-label="Lista de itens do pedido">
+                            <!-- Itens serão adicionados aqui dinamicamente -->
+                        </div>
+
+                        <!-- Estado vazio dos itens -->
+                        <div id="itens-empty-state" class="empty-state empty-state--compact" role="status">
+                            <i class="fas fa-shopping-basket empty-state__icon" aria-hidden="true"></i>
+                            <p class="empty-state__text">Nenhum item adicionado</p>
+                        </div>
+
+                        <!-- Ações dos itens -->
+                        <div class="itens-actions">
+                            <button type="button" 
+                                    class="btn btn--primary" 
+                                    id="add-item-btn"
+                                    onclick="adicionarItem()">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                Adicionar Item
+                            </button>
+                            
+                            <div class="itens-summary" id="itens-summary" aria-live="polite">
+                                <!-- Resumo será atualizado dinamicamente -->
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Observações -->
+                    <fieldset class="form-section">
+                        <legend class="form-section__title">
+                            <i class="fas fa-sticky-note form-section__icon" aria-hidden="true"></i>
+                            Observações (Opcional)
+                        </legend>
+                        
+                        <div class="form-group">
+                            <label for="observacoes" class="form-label">
+                                Observações do Pedido
+                            </label>
+                            <textarea id="observacoes" 
+                                      name="observacoes"
+                                      class="form-control form-control--textarea" 
+                                      rows="3" 
+                                      placeholder="Adicione observações especiais, instruções de entrega, ou informações adicionais..."
+                                      maxlength="500"
+                                      aria-describedby="observacoes-help"></textarea>
+                            <div id="observacoes-help" class="form-help">
+                                Máximo de 500 caracteres. 
+                                <span id="observacoes-counter" class="char-counter">500 restantes</span>
+                            </div>
+                        </div>
+                    </fieldset>
+
+                    <!-- Resumo do Pedido -->
+                    <div class="pedido-summary" id="pedido-summary" aria-live="polite" hidden>
+                        <h3 class="summary-title">
+                            <i class="fas fa-receipt" aria-hidden="true"></i>
+                            Resumo do Pedido
+                        </h3>
+                        <div class="summary-content" id="summary-content">
+                            <!-- Resumo será preenchido dinamicamente -->
+                        </div>
+                    </div>
+
+                    <!-- Ações do Formulário -->
+                    <div class="form-actions form-actions--sticky">
+                        <div class="action-group">
+                            <button type="button" 
+                                    class="btn btn--secondary" 
+                                    onclick="window.location.href='index.html'"
+                                    id="cancel-btn">
+                                <i class="fas fa-times" aria-hidden="true"></i>
+                                Cancelar
+                            </button>
+                            
+                            <button type="reset" 
+                                    class="btn btn--outline" 
+                                    id="reset-btn">
+                                <i class="fas fa-undo" aria-hidden="true"></i>
+                                Limpar
+                            </button>
+                        </div>
+                        
+                        <div class="action-group">
+                            <button type="submit" 
+                                    class="btn btn--primary btn--lg" 
+                                    id="submit-btn">
+                                <i class="fas fa-save" aria-hidden="true"></i>
+                                Criar Pedido
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </section>
+        </main>
+
+        <!-- Área de mensagens do sistema -->
+        <div id="message-area" class="message-area" role="status" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer__content">
+                <p class="footer__text">
+                    &copy; 2024 FastPedido. Sistema de gerenciamento de pedidos.
+                </p>
+            </div>
+        </footer>
     </div>
 
+    <!-- Modal de confirmação -->
+    <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="confirm-title" aria-hidden="true">
+        <div class="modal__content">
+            <div class="modal__header">
+                <h3 id="confirm-title" class="modal__title">Confirmar Ação</h3>
+            </div>
+            <div class="modal__body">
+                <p id="confirm-message">Tem certeza que deseja prosseguir?</p>
+            </div>
+            <div class="modal__footer">
+                <button type="button" class="btn btn--secondary" id="confirm-cancel">
+                    Cancelar
+                </button>
+                <button type="button" class="btn btn--primary" id="confirm-ok">
+                    Confirmar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts da aplicação -->
     <script src="js/supabase-client.js"></script>
     <script src="js/novo-pedido.js"></script>
+    
+    <!-- Script de melhorias para o formulário -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar melhorias do formulário
+            inicializarMelhoriasFormulario();
+            
+            // Configurar validações em tempo real
+            configurarValidacoesTempoReal();
+            
+            // Configurar contador de caracteres
+            configurarContadorCaracteres();
+        });
+
+        function inicializarMelhoriasFormulario() {
+            // Atualizar progresso do formulário
+            const campos = document.querySelectorAll('#form-pedido [required]');
+            campos.forEach(campo => {
+                campo.addEventListener('input', atualizarProgressoFormulario);
+                campo.addEventListener('change', atualizarProgressoFormulario);
+            });
+
+            // Configurar botão de limpar
+            const resetBtn = document.getElementById('reset-btn');
+            if (resetBtn) {
+                resetBtn.addEventListener('click', function() {
+                    mostrarConfirmacao(
+                        'Limpar Formulário',
+                        'Tem certeza que deseja limpar todos os dados do formulário?',
+                        function() {
+                            document.getElementById('form-pedido').reset();
+                            document.getElementById('itens-container').innerHTML = '';
+                            atualizarProgressoFormulario();
+                            atualizarResumoItens();
+                            mostrarMensagem('Formulário limpo com sucesso', 'success');
+                        }
+                    );
+                });
+            }
+
+            // Prevenir envio duplo
+            const form = document.getElementById('form-pedido');
+            form.addEventListener('submit', function(e) {
+                const submitBtn = document.getElementById('submit-btn');
+                if (submitBtn.disabled) {
+                    e.preventDefault();
+                    return;
+                }
+            });
+        }
+
+        function configurarValidacoesTempoReal() {
+            const clienteInput = document.getElementById('cliente');
+            const telefoneInput = document.getElementById('telefone');
+            const feedback = document.getElementById('cliente-feedback');
+
+            if (clienteInput && feedback) {
+                clienteInput.addEventListener('input', function() {
+                    const valor = this.value.trim();
+                    
+                    if (valor.length === 0) {
+                        feedback.textContent = '';
+                        this.classList.remove('form-control--valid', 'form-control--invalid');
+                    } else if (valor.length < 2) {
+                        feedback.textContent = 'Nome muito curto';
+                        this.classList.add('form-control--invalid');
+                        this.classList.remove('form-control--valid');
+                    } else {
+                        feedback.textContent = 'Nome válido';
+                        this.classList.add('form-control--valid');
+                        this.classList.remove('form-control--invalid');
+                    }
+                });
+            }
+
+            if (telefoneInput) {
+                telefoneInput.addEventListener('input', function(e) {
+                    let valor = e.target.value.replace(/\D/g, '');
+                    
+                    if (valor.length > 0) {
+                        valor = valor.replace(/^(\d{2})(\d)/g, '($1) $2');
+                        valor = valor.replace(/(\d{5})(\d)/, '$1-$2');
+                        valor = valor.substring(0, 15);
+                    }
+                    
+                    e.target.value = valor;
+                });
+            }
+        }
+
+        function configurarContadorCaracteres() {
+            const observacoes = document.getElementById('observacoes');
+            const counter = document.getElementById('observacoes-counter');
+
+            if (observacoes && counter) {
+                observacoes.addEventListener('input', function() {
+                    const restantes = 500 - this.value.length;
+                    counter.textContent = `${restantes} caracteres restantes`;
+                    
+                    if (restantes < 50) {
+                        counter.classList.add('char-counter--warning');
+                    } else {
+                        counter.classList.remove('char-counter--warning');
+                    }
+                    
+                    if (restantes < 0) {
+                        this.value = this.value.substring(0, 500);
+                    }
+                });
+            }
+        }
+
+        function atualizarProgressoFormulario() {
+            const camposObrigatorios = document.querySelectorAll('#form-pedido [required]');
+            const itensContainer = document.getElementById('itens-container');
+            const itens = itensContainer.querySelectorAll('.order-item');
+            
+            let preenchidos = 0;
+            let total = camposObrigatorios.length + 1; // +1 para pelo menos um item
+
+            // Contar campos obrigatórios preenchidos
+            camposObrigatorios.forEach(campo => {
+                if (campo.type === 'select-one') {
+                    if (campo.value) preenchidos++;
+                } else {
+                    if (campo.value.trim()) preenchidos++;
+                }
+            });
+
+            // Verificar se tem pelo menos um item
+            if (itens.length > 0) {
+                const itensValidos = Array.from(itens).every(item => {
+                    const select = item.querySelector('select');
+                    const input = item.querySelector('input[type="number"]');
+                    return select.value && input.value && parseInt(input.value) > 0;
+                });
+                
+                if (itensValidos) preenchidos++;
+            }
+
+            const progresso = Math.round((preenchidos / total) * 100);
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+
+            if (progressFill) {
+                progressFill.style.width = `${progresso}%`;
+            }
+
+            if (progressText) {
+                progressText.textContent = `${progresso}% completo`;
+            }
+
+            // Atualizar resumo do pedido
+            atualizarResumoPedido();
+        }
+
+        function atualizarResumoPedido() {
+            const summary = document.getElementById('pedido-summary');
+            const content = document.getElementById('summary-content');
+            const cliente = document.getElementById('cliente').value;
+            const status = document.getElementById('status').value;
+            const itens = document.getElementById('itens-container').querySelectorAll('.order-item');
+            
+            if (cliente && status && itens.length > 0) {
+                let total = 0;
+                let html = `
+                    <div class="summary-item">
+                        <strong>Cliente:</strong> ${cliente}
+                    </div>
+                    <div class="summary-item">
+                        <strong>Status:</strong> <span class="status-badge status-${status.toLowerCase().replace(' ', '-')}">${status}</span>
+                    </div>
+                    <div class="summary-item">
+                        <strong>Itens:</strong>
+                        <ul class="summary-list">
+                `;
+
+                itens.forEach(item => {
+                    const select = item.querySelector('select');
+                    const quantidade = item.querySelector('input[type="number"]').value;
+                    const option = select.selectedOptions[0];
+                    const preco = parseFloat(option?.dataset.preco || 0);
+                    const subtotal = preco * parseInt(quantidade);
+                    total += subtotal;
+
+                    html += `
+                        <li class="summary-list__item">
+                            ${quantidade}x ${option?.textContent.split(' - ')[0]} - ${formatarMoeda(subtotal)}
+                        </li>
+                    `;
+                });
+
+                html += `
+                        </ul>
+                    </div>
+                    <div class="summary-total">
+                        <strong>Total do Pedido:</strong> ${formatarMoeda(total)}
+                    </div>
+                `;
+
+                content.innerHTML = html;
+                summary.hidden = false;
+            } else {
+                summary.hidden = true;
+            }
+        }
+
+        function formatarMoeda(valor) {
+            return new Intl.NumberFormat('pt-BR', {
+                style: 'currency',
+                currency: 'BRL'
+            }).format(valor);
+        }
+
+        function mostrarConfirmacao(titulo, mensagem, callback) {
+            const modal = document.getElementById('confirm-modal');
+            const title = document.getElementById('confirm-title');
+            const message = document.getElementById('confirm-message');
+            const cancelBtn = document.getElementById('confirm-cancel');
+            const okBtn = document.getElementById('confirm-ok');
+
+            title.textContent = titulo;
+            message.textContent = mensagem;
+
+            // Configurar eventos
+            const fecharModal = function(resultado) {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+                
+                cancelBtn.removeEventListener('click', cancelHandler);
+                okBtn.removeEventListener('click', okHandler);
+                
+                if (resultado && callback) {
+                    callback();
+                }
+            };
+
+            const cancelHandler = () => fecharModal(false);
+            const okHandler = () => fecharModal(true);
+
+            cancelBtn.addEventListener('click', cancelHandler);
+            okBtn.addEventListener('click', okHandler);
+
+            // Mostrar modal
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        // Expor funções globalmente para o novo-pedido.js
+        window.atualizarProgressoFormulario = atualizarProgressoFormulario;
+        window.atualizarResumoPedido = atualizarResumoPedido;
+        window.mostrarConfirmacao = mostrarConfirmacao;
+    </script>
 </body>
 </html>

@@ -3,82 +3,229 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastPedido - Produtos</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="description" content="Sistema de gerenciamento de produtos FastPedido - Cadastre e gerencie seus produtos de forma eficiente">
+    <meta name="keywords" content="fastpedido, produtos, gerenciamento, pedidos, restaurante">
+    <meta name="author" content="FastPedido">
+    
+    <title>FastPedido - Gerenciamento de Produtos</title>
+    
+    <!-- Preload para recursos críticos -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="css/style.css" as="style">
+    
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Favicon (adicionar quando disponível) -->
+    <!-- <link rel="icon" type="image/x-icon" href="/favicon.ico"> -->
 </head>
 <body>
+    <!-- Skip link para acessibilidade -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
     <div class="container">
-        <header>
-            <h1><i class="fas fa-hamburger"></i> FastPedido</h1>
+        <header role="banner">
+            <h1>
+                <i class="fas fa-hamburger" aria-hidden="true"></i> 
+                FastPedido
+                <span class="sr-only">- Sistema de gerenciamento</span>
+            </h1>
             <p class="subtitle">Gerenciamento de produtos</p>
         </header>
 
-        <nav class="main-nav">
+        <nav class="main-nav" role="navigation" aria-label="Navegação principal">
             <a href="index.html" class="nav-link">
-                <i class="fas fa-list"></i> Pedidos
+                <i class="fas fa-list" aria-hidden="true"></i> 
+                <span>Pedidos</span>
             </a>
-            <a href="produtos.html" class="nav-link active">
-                <i class="fas fa-utensils"></i> Produtos
+            <a href="produtos.html" class="nav-link active" aria-current="page">
+                <i class="fas fa-utensils" aria-hidden="true"></i> 
+                <span>Produtos</span>
             </a>
             <a href="novo-pedido.html" class="nav-link">
-                <i class="fas fa-plus-circle"></i> Novo Pedido
+                <i class="fas fa-plus-circle" aria-hidden="true"></i> 
+                <span>Novo Pedido</span>
             </a>
         </nav>
 
-        <div class="card">
-            <div class="header-actions">
-                <h2 class="card-title"><i class="fas fa-utensils"></i> Produtos Cadastrados</h2>
-                <button class="btn btn-primary" onclick="abrirModalProduto()">
-                    <i class="fas fa-plus"></i> Novo Produto
-                </button>
-            </div>
+        <main id="main-content" role="main">
+            <section class="card" aria-labelledby="produtos-title">
+                <div class="header-actions">
+                    <h2 id="produtos-title" class="card-title">
+                        <i class="fas fa-utensils" aria-hidden="true"></i> 
+                        Produtos Cadastrados
+                    </h2>
+                    <button class="btn btn-primary" onclick="abrirModalProduto()" aria-label="Adicionar novo produto">
+                        <i class="fas fa-plus" aria-hidden="true"></i> 
+                        Novo Produto
+                    </button>
+                </div>
 
-            <div id="loading" class="loading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Carregando produtos...
-            </div>
-            <div id="produtos-container" class="produtos-grid"></div>
-        </div>
+                <div id="loading" class="loading" style="display: none;" role="status" aria-live="polite">
+                    <i class="fas fa-spinner fa-spin" aria-hidden="true"></i> 
+                    Carregando produtos...
+                </div>
+                
+                <div id="produtos-container" class="produtos-grid" role="list" aria-label="Lista de produtos"></div>
+                
+                <!-- Mensagem para quando não há produtos -->
+                <div id="empty-state" class="empty-state" style="display: none;">
+                    <i class="fas fa-inbox" aria-hidden="true"></i>
+                    <h3>Nenhum produto cadastrado</h3>
+                    <p>Comece adicionando seu primeiro produto ao sistema.</p>
+                    <button class="btn btn-primary" onclick="abrirModalProduto()">
+                        <i class="fas fa-plus" aria-hidden="true"></i> 
+                        Adicionar Primeiro Produto
+                    </button>
+                </div>
+            </section>
+        </main>
 
-        <div id="message-area"></div>
+        <div id="message-area" role="alert" aria-live="polite"></div>
     </div>
 
     <!-- Modal Produto -->
-    <div id="modal-produto" class="modal">
+    <div id="modal-produto" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" aria-hidden="true">
         <div class="modal-content">
-            <h3 id="modal-titulo"><i class="fas fa-utensils"></i> Novo Produto</h3>
-            <form id="form-produto">
+            <div class="modal-header">
+                <h3 id="modal-titulo">
+                    <i class="fas fa-utensils" aria-hidden="true"></i> 
+                    Novo Produto
+                </h3>
+                <button class="btn-close" onclick="fecharModal()" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
+            </div>
+            
+            <form id="form-produto" novalidate>
                 <input type="hidden" id="produto-id">
                 
                 <div class="form-group">
-                    <label for="nome"><i class="fas fa-tag"></i> Nome *</label>
-                    <input type="text" id="nome" required>
+                    <label for="nome">
+                        <i class="fas fa-tag" aria-hidden="true"></i> 
+                        Nome *
+                    </label>
+                    <input type="text" id="nome" required aria-required="true" aria-describedby="nome-error">
+                    <span id="nome-error" class="error-message" aria-live="polite"></span>
                 </div>
                 
                 <div class="form-group">
-                    <label for="preco"><i class="fas fa-dollar-sign"></i> Preço (R$) *</label>
-                    <input type="number" id="preco" step="0.01" min="0" required>
+                    <label for="preco">
+                        <i class="fas fa-dollar-sign" aria-hidden="true"></i> 
+                        Preço (R$) *
+                    </label>
+                    <input type="number" id="preco" step="0.01" min="0" required 
+                           aria-required="true" aria-describedby="preco-error">
+                    <span id="preco-error" class="error-message" aria-live="polite"></span>
                 </div>
                 
                 <div class="form-group">
-                    <label for="descricao"><i class="fas fa-align-left"></i> Descrição</label>
-                    <textarea id="descricao" rows="3"></textarea>
+                    <label for="descricao">
+                        <i class="fas fa-align-left" aria-hidden="true"></i> 
+                        Descrição
+                    </label>
+                    <textarea id="descricao" rows="3" aria-describedby="descricao-help"></textarea>
+                    <small id="descricao-help" class="help-text">Descrição opcional do produto</small>
                 </div>
 
                 <div class="form-buttons">
                     <button type="button" class="btn btn-secondary" onclick="fecharModal()">
-                        <i class="fas fa-times"></i> Cancelar
+                        <i class="fas fa-times" aria-hidden="true"></i> 
+                        Cancelar
                     </button>
                     <button type="submit" class="btn btn-primary" id="submit-btn">
-                        <i class="fas fa-save"></i> Salvar
+                        <i class="fas fa-save" aria-hidden="true"></i> 
+                        Salvar
                     </button>
                 </div>
             </form>
         </div>
     </div>
 
+    <!-- Scripts no final do body para melhor performance -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase-client.js"></script>
     <script src="js/produtos.js"></script>
+    
+    <!-- CSS para elementos de acessibilidade -->
+    <style>
+        .skip-link {
+            position: absolute;
+            top: -40px;
+            left: 6px;
+            background: #000;
+            color: white;
+            padding: 8px;
+            z-index: 100;
+            text-decoration: none;
+            border-radius: 0 0 4px 4px;
+        }
+        
+        .skip-link:focus {
+            top: 0;
+        }
+        
+        .sr-only {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #ccc;
+        }
+        
+        .error-message {
+            color: #d32f2f;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .help-text {
+            color: #666;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            display: block;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            color: #666;
+            padding: 0.25rem;
+        }
+        
+        .btn-close:hover {
+            color: #333;
+        }
+    </style>
 </body>
 </html>

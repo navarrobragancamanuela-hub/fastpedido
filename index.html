@@ -1,87 +1,419 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-BR" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastPedido - Sistema de Pedidos</title>
+    <title>FastPedido - Sistema de Gerenciamento de Pedidos</title>
+    
+    <!-- Meta tags para SEO e acessibilidade -->
+    <meta name="description" content="Sistema profissional de gerenciamento de pedidos para lanchonetes e restaurantes">
+    <meta name="keywords" content="pedidos, lanchonete, restaurante, gestão, fastfood">
+    <meta name="author" content="FastPedido">
+    
+    <!-- Favicon e ícones -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🍔</text></svg>">
+    
+    <!-- Preload de recursos críticos -->
+    <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script">
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
+    <link rel="preload" href="css/style.css" as="style">
+    
+    <!-- CDN de dependências -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
+          integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
+          crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- CSS personalizado -->
     <link rel="stylesheet" href="css/style.css">
+    
+    <!-- Structured Data para SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "WebApplication",
+        "name": "FastPedido",
+        "description": "Sistema de gerenciamento de pedidos para lanchonetes",
+        "url": "https://seusite.com",
+        "applicationCategory": "BusinessApplication",
+        "operatingSystem": "Web Browser"
+    }
+    </script>
 </head>
 <body>
+    <!-- Skip link para acessibilidade -->
+    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
+    
     <div class="container">
-        <header>
-            <h1><i class="fas fa-hamburger"></i> FastPedido</h1>
-            <p class="subtitle">Sistema de gerenciamento de pedidos</p>
+        <!-- Cabeçalho com informações da empresa -->
+        <header class="header" role="banner">
+            <div class="header__content">
+                <div class="logo">
+                    <i class="fas fa-hamburger logo__icon" aria-hidden="true"></i>
+                    <h1 class="header__title">
+                        FastPedido
+                        <span class="badge badge--primary badge--sm" aria-label="Sistema em produção">PRO</span>
+                    </h1>
+                </div>
+                
+                <p class="subtitle">
+                    Sistema profissional de gerenciamento de pedidos
+                </p>
+                
+                <!-- Status do sistema -->
+                <div class="system-status" aria-live="polite">
+                    <span class="status-indicator status-indicator--online" id="system-status">
+                        <i class="fas fa-circle" aria-hidden="true"></i>
+                        Sistema online
+                    </span>
+                    <span class="last-update" id="last-update" aria-label="Última atualização"></span>
+                </div>
+            </div>
         </header>
 
-        <nav class="main-nav">
-            <a href="index.html" class="nav-link active">
-                <i class="fas fa-list"></i> Pedidos
-            </a>
-            <a href="produtos.html" class="nav-link">
-                <i class="fas fa-utensils"></i> Produtos
-            </a>
-            <a href="novo-pedido.html" class="nav-link">
-                <i class="fas fa-plus-circle"></i> Novo Pedido
-            </a>
+        <!-- Navegação principal -->
+        <nav class="nav" role="navigation" aria-label="Navegação principal">
+            <ul class="nav__list" role="menubar">
+                <li class="nav__item" role="none">
+                    <a href="index.html" class="nav__link nav__link--active" role="menuitem" aria-current="page">
+                        <i class="fas fa-list nav__icon" aria-hidden="true"></i>
+                        <span class="nav__text">Pedidos</span>
+                        <span class="nav__badge" id="pedidos-count" aria-label="Número de pedidos ativos">0</span>
+                    </a>
+                </li>
+                <li class="nav__item" role="none">
+                    <a href="produtos.html" class="nav__link" role="menuitem">
+                        <i class="fas fa-utensils nav__icon" aria-hidden="true"></i>
+                        <span class="nav__text">Produtos</span>
+                        <span class="nav__badge" id="produtos-count" aria-label="Número de produtos cadastrados">0</span>
+                    </a>
+                </li>
+                <li class="nav__item" role="none">
+                    <a href="novo-pedido.html" class="nav__link nav__link--highlight" role="menuitem">
+                        <i class="fas fa-plus-circle nav__icon" aria-hidden="true"></i>
+                        <span class="nav__text">Novo Pedido</span>
+                    </a>
+                </li>
+            </ul>
         </nav>
 
-        <div class="card">
-            <h2 class="card-title"><i class="fas fa-list"></i> Pedidos Ativos</h2>
-            <div id="loading" class="loading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Carregando pedidos...
-            </div>
-            <div id="pedidos-container" class="pedidos-grid"></div>
-        </div>
+        <!-- Conteúdo principal -->
+        <main id="main-content" class="main" role="main">
+            <!-- Cartão de visão geral -->
+            <section class="card overview-card" aria-labelledby="overview-title">
+                <div class="card__header">
+                    <h2 class="card__title" id="overview-title">
+                        <i class="fas fa-chart-line card__icon" aria-hidden="true"></i>
+                        Visão Geral
+                    </h2>
+                    <button class="btn btn--outline btn--sm" id="refresh-btn" aria-label="Atualizar dados">
+                        <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                        Atualizar
+                    </button>
+                </div>
+                
+                <div class="overview-grid">
+                    <div class="stat-card stat-card--primary">
+                        <div class="stat-card__icon">
+                            <i class="fas fa-list" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-card__content">
+                            <span class="stat-card__value" id="total-pedidos">0</span>
+                            <span class="stat-card__label">Total de Pedidos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-card--warning">
+                        <div class="stat-card__icon">
+                            <i class="fas fa-clock" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-card__content">
+                            <span class="stat-card__value" id="pedidos-preparo">0</span>
+                            <span class="stat-card__label">Em Preparo</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-card--success">
+                        <div class="stat-card__icon">
+                            <i class="fas fa-check" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-card__content">
+                            <span class="stat-card__value" id="pedidos-prontos">0</span>
+                            <span class="stat-card__label">Prontos</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card stat-card--info">
+                        <div class="stat-card__icon">
+                            <i class="fas fa-truck" aria-hidden="true"></i>
+                        </div>
+                        <div class="stat-card__content">
+                            <span class="stat-card__value" id="pedidos-entregues">0</span>
+                            <span class="stat-card__label">Entregues</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-        <div id="message-area"></div>
+            <!-- Cartão de pedidos ativos -->
+            <section class="card" aria-labelledby="pedidos-title">
+                <div class="card__header">
+                    <h2 class="card__title" id="pedidos-title">
+                        <i class="fas fa-list card__icon" aria-hidden="true"></i>
+                        Pedidos Ativos
+                        <span class="card__subtitle" id="pedidos-subtitle">Carregando...</span>
+                    </h2>
+                    
+                    <div class="card__actions">
+                        <div class="filter-group">
+                            <label for="status-filter" class="filter-label">
+                                <i class="fas fa-filter" aria-hidden="true"></i>
+                                Filtrar:
+                            </label>
+                            <select id="status-filter" class="filter-select" aria-label="Filtrar pedidos por status">
+                                <option value="all">Todos os status</option>
+                                <option value="Em preparo">Em preparo</option>
+                                <option value="Pronto">Pronto</option>
+                                <option value="Entregue">Entregue</option>
+                            </select>
+                        </div>
+                        
+                        <button class="btn btn--primary btn--sm" onclick="window.location.href='novo-pedido.html'">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            Novo Pedido
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Estado de carregamento -->
+                <div id="loading" class="loading" role="status" aria-live="polite" aria-label="Carregando pedidos">
+                    <div class="loading__content">
+                        <div class="loading__spinner" aria-hidden="true"></div>
+                        <p class="loading__text">Carregando pedidos...</p>
+                    </div>
+                </div>
+
+                <!-- Container de pedidos -->
+                <div id="pedidos-container" class="grid grid--auto-fit" role="list" aria-label="Lista de pedidos">
+                    <!-- Os pedidos serão inseridos aqui via JavaScript -->
+                </div>
+
+                <!-- Estado vazio -->
+                <div id="empty-state" class="empty-state" role="status" aria-live="polite" hidden>
+                    <div class="empty-state__content">
+                        <i class="fas fa-list empty-state__icon" aria-hidden="true"></i>
+                        <h3 class="empty-state__title">Nenhum pedido encontrado</h3>
+                        <p class="empty-state__description">
+                            Comece criando seu primeiro pedido para ver a lista aqui.
+                        </p>
+                        <button class="btn btn--primary empty-state__action" onclick="window.location.href='novo-pedido.html'">
+                            <i class="fas fa-plus" aria-hidden="true"></i>
+                            Criar Primeiro Pedido
+                        </button>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Área de mensagens do sistema -->
+        <div id="message-area" class="message-area" role="status" aria-live="polite" aria-atomic="true"></div>
+
+        <!-- Footer -->
+        <footer class="footer" role="contentinfo">
+            <div class="footer__content">
+                <p class="footer__text">
+                    &copy; 2024 FastPedido. 
+                    <span class="footer__version" id="app-version">v1.0.0</span>
+                </p>
+                <div class="footer__links">
+                    <button class="footer__link" onclick="mostrarSobre()" aria-label="Sobre o sistema">
+                        <i class="fas fa-info-circle" aria-hidden="true"></i>
+                        Sobre
+                    </button>
+                    <span class="footer__separator" aria-hidden="true">•</span>
+                    <span class="footer__status" id="footer-status">
+                        <i class="fas fa-database" aria-hidden="true"></i>
+                        Conectado ao banco
+                    </span>
+                </div>
+            </div>
+        </footer>
     </div>
 
-    <script src="js/supabase-client.js"></script>
-    <script src="js/pedidos.js"></script>
-</body>
-</html><!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>FastPedido - Sistema de Pedidos</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-    <div class="container">
-        <header>
-            <h1><i class="fas fa-hamburger"></i> FastPedido</h1>
-            <p class="subtitle">Sistema de gerenciamento de pedidos</p>
-        </header>
-
-        <nav class="main-nav">
-            <a href="index.html" class="nav-link active">
-                <i class="fas fa-list"></i> Pedidos
-            </a>
-            <a href="produtos.html" class="nav-link">
-                <i class="fas fa-utensils"></i> Produtos
-            </a>
-            <a href="novo-pedido.html" class="nav-link">
-                <i class="fas fa-plus-circle"></i> Novo Pedido
-            </a>
-        </nav>
-
-        <div class="card">
-            <h2 class="card-title"><i class="fas fa-list"></i> Pedidos Ativos</h2>
-            <div id="loading" class="loading" style="display: none;">
-                <i class="fas fa-spinner fa-spin"></i> Carregando pedidos...
+    <!-- Modal de sobre -->
+    <div id="about-modal" class="modal" role="dialog" aria-labelledby="about-title" aria-hidden="true">
+        <div class="modal__content modal__content--large">
+            <div class="modal__header">
+                <h3 id="about-title" class="modal__title">
+                    <i class="fas fa-info-circle" aria-hidden="true"></i>
+                    Sobre o FastPedido
+                </h3>
+                <button class="modal__close" onclick="fecharModalSobre()" aria-label="Fechar modal">
+                    <i class="fas fa-times" aria-hidden="true"></i>
+                </button>
             </div>
-            <div id="pedidos-container" class="pedidos-grid"></div>
+            
+            <div class="modal__body">
+                <div class="about-content">
+                    <div class="about-section">
+                        <h4 class="about-section__title">Sistema de Gerenciamento</h4>
+                        <p class="about-section__description">
+                            FastPedido é um sistema profissional para gerenciamento de pedidos 
+                            em lanchonetes e restaurantes, desenvolvido com tecnologias modernas.
+                        </p>
+                    </div>
+                    
+                    <div class="about-grid">
+                        <div class="tech-card">
+                            <i class="fab fa-html5 tech-card__icon" aria-hidden="true"></i>
+                            <span class="tech-card__name">HTML5</span>
+                        </div>
+                        <div class="tech-card">
+                            <i class="fab fa-css3-alt tech-card__icon" aria-hidden="true"></i>
+                            <span class="tech-card__name">CSS3</span>
+                        </div>
+                        <div class="tech-card">
+                            <i class="fab fa-js tech-card__icon" aria-hidden="true"></i>
+                            <span class="tech-card__name">JavaScript</span>
+                        </div>
+                        <div class="tech-card">
+                            <i class="fas fa-database tech-card__icon" aria-hidden="true"></i>
+                            <span class="tech-card__name">Supabase</span>
+                        </div>
+                    </div>
+                    
+                    <div class="about-section">
+                        <h4 class="about-section__title">Funcionalidades</h4>
+                        <ul class="features-list" role="list">
+                            <li class="features-list__item">
+                                <i class="fas fa-check features-list__icon" aria-hidden="true"></i>
+                                Cadastro e gerenciamento de produtos
+                            </li>
+                            <li class="features-list__item">
+                                <i class="fas fa-check features-list__icon" aria-hidden="true"></i>
+                                Criação de pedidos com múltiplos itens
+                            </li>
+                            <li class="features-list__item">
+                                <i class="fas fa-check features-list__icon" aria-hidden="true"></i>
+                                Controle de status em tempo real
+                            </li>
+                            <li class="features-list__item">
+                                <i class="fas fa-check features-list__icon" aria-hidden="true"></i>
+                                Interface responsiva e acessível
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="modal__footer">
+                <button class="btn btn--primary" onclick="fecharModalSobre()">
+                    Fechar
+                </button>
+            </div>
         </div>
-
-        <div id="message-area"></div>
     </div>
 
+    <!-- Scripts da aplicação -->
     <script src="js/supabase-client.js"></script>
     <script src="js/pedidos.js"></script>
+    
+    <!-- Script de inicialização -->
+    <script>
+        // Configurações iniciais
+        document.addEventListener('DOMContentLoaded', function() {
+            // Inicializar funcionalidades adicionais
+            inicializarFuncionalidadesExtras();
+            
+            // Configurar auto-refresh
+            configurarAutoRefresh();
+            
+            // Atualizar informações do sistema
+            atualizarInformacoesSistema();
+        });
+
+        // Funcionalidades extras para a página inicial
+        function inicializarFuncionalidadesExtras() {
+            // Configurar filtro de status
+            const filtroStatus = document.getElementById('status-filter');
+            if (filtroStatus) {
+                filtroStatus.addEventListener('change', function() {
+                    filtrarPedidosPorStatus(this.value);
+                });
+            }
+            
+            // Botão de refresh
+            const refreshBtn = document.getElementById('refresh-btn');
+            if (refreshBtn) {
+                refreshBtn.addEventListener('click', function() {
+                    carregarPedidos();
+                    this.classList.add('btn--loading');
+                    setTimeout(() => this.classList.remove('btn--loading'), 1000);
+                });
+            }
+            
+            // Atualizar contadores na navegação
+            atualizarContadoresNavegacao();
+        }
+
+        function configurarAutoRefresh() {
+            // Auto-refresh a cada 30 segundos
+            setInterval(() => {
+                if (!document.hidden) {
+                    carregarPedidos();
+                    atualizarInformacoesSistema();
+                }
+            }, 30000);
+        }
+
+        function atualizarInformacoesSistema() {
+            const agora = new Date();
+            document.getElementById('last-update').textContent = 
+                `Atualizado: ${agora.toLocaleTimeString('pt-BR')}`;
+        }
+
+        function atualizarContadoresNavegacao() {
+            // Esta função será implementada no pedidos.js refinado
+            // para atualizar os badges de contagem
+        }
+
+        function filtrarPedidosPorStatus(status) {
+            const cards = document.querySelectorAll('.item-card');
+            let visiveis = 0;
+            
+            cards.forEach(card => {
+                const cardStatus = card.querySelector('.badge').textContent;
+                const deveMostrar = status === 'all' || cardStatus === status;
+                
+                card.style.display = deveMostrar ? 'block' : 'none';
+                if (deveMostrar) visiveis++;
+            });
+            
+            // Mostrar/ocultar estado vazio
+            const emptyState = document.getElementById('empty-state');
+            if (emptyState) {
+                emptyState.hidden = visiveis > 0;
+            }
+        }
+
+        function mostrarSobre() {
+            const modal = document.getElementById('about-modal');
+            modal.style.display = 'flex';
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function fecharModalSobre() {
+            const modal = document.getElementById('about-modal');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+        }
+
+        // Fechar modal com ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                fecharModalSobre();
+            }
+        });
+    </script>
 </body>
 </html>
