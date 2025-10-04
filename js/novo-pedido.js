@@ -2,18 +2,25 @@ let formPedido, itensContainer, messageArea, submitBtn;
 let produtosDisponiveis = [];
 
 document.addEventListener('DOMContentLoaded', async () => {
+    console.log('🚀 Inicializando novo-pedido.js...');
+    
     formPedido = document.getElementById('form-pedido');
     itensContainer = document.getElementById('itens-container');
     messageArea = document.getElementById('message-area');
     submitBtn = document.getElementById('submit-btn');
     
+    console.log('📦 Elementos DOM:', { formPedido, itensContainer, messageArea, submitBtn });
+    
     await carregarProdutos();
     adicionarItem(); // Adiciona o primeiro item automaticamente
     
     formPedido.addEventListener('submit', handleSubmitPedido);
+    
+    console.log('✅ Novo-pedido.js inicializado!');
 });
 
 function mostrarMensagem(mensagem, tipo = 'error') {
+    console.log(`📢 Mensagem: ${mensagem} (${tipo})`);
     const messageDiv = document.createElement('div');
     messageDiv.className = `${tipo} message`;
     messageDiv.innerHTML = `
@@ -32,15 +39,25 @@ function mostrarMensagem(mensagem, tipo = 'error') {
 
 async function carregarProdutos() {
     try {
+        console.log('🔄 Carregando produtos do Supabase...');
+        
         const { data: produtos, error } = await supabase
             .from('produtos')
             .select('*')
             .order('nome', { ascending: true });
 
-        if (error) throw error;
-        
+        if (error) {
+            console.error('❌ Erro do Supabase:', error);
+            throw error;
+        }
+
         produtosDisponiveis = produtos || [];
         console.log('✅ Produtos carregados:', produtosDisponiveis);
+        
+        if (produtosDisponiveis.length === 0) {
+            console.warn('⚠️ Nenhum produto encontrado no banco!');
+            mostrarMensagem('Nenhum produto cadastrado. Cadastre produtos primeiro!', 'error');
+        }
         
     } catch (error) {
         console.error('❌ Erro ao carregar produtos:', error);
@@ -49,6 +66,9 @@ async function carregarProdutos() {
 }
 
 function adicionarItem() {
+    console.log('➕ Adicionando novo item...');
+    console.log('📊 Produtos disponíveis:', produtosDisponiveis);
+    
     if (produtosDisponiveis.length === 0) {
         mostrarMensagem('Nenhum produto disponível. Cadastre produtos primeiro.', 'error');
         return;
@@ -98,6 +118,8 @@ function adicionarItem() {
     itemDiv.appendChild(btnRemover);
     
     itensContainer.appendChild(itemDiv);
+    
+    console.log('✅ Item adicionado com sucesso!');
 }
 
 async function handleSubmitPedido(event) {
@@ -138,6 +160,8 @@ async function handleSubmitPedido(event) {
     try {
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Criando...';
+
+        console.log('📝 Criando pedido...', { cliente, status, itens });
 
         // 1. Criar o pedido
         const { data: pedido, error: pedidoError } = await supabase
@@ -185,3 +209,6 @@ async function handleSubmitPedido(event) {
         submitBtn.innerHTML = '<i class="fas fa-save"></i> Criar Pedido';
     }
 }
+
+// Funções globais
+window.adicionarItem = adicionarItem;
