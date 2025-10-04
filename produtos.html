@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastPedido - Produtos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-hamburger"></i> FastPedido</h1>
+            <p class="subtitle">Gerenciamento de produtos</p>
+        </header>
+
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-list"></i> Pedidos
+            </a>
+            <a href="produtos.html" class="nav-link active">
+                <i class="fas fa-utensils"></i> Produtos
+            </a>
+            <a href="novo-pedido.html" class="nav-link">
+                <i class="fas fa-plus-circle"></i> Novo Pedido
+            </a>
+        </nav>
+
+        <div class="card">
+            <div class="header-actions">
+                <h2 class="card-title"><i class="fas fa-utensils"></i> Produtos Cadastrados</h2>
+                <button class="btn btn-primary" onclick="abrirModalProduto()">
+                    <i class="fas fa-plus"></i> Novo Produto
+                </button>
+            </div>
+
+            <div id="loading" class="loading" style="display: none;">
+                <i class="fas fa-spinner fa-spin"></i> Carregando produtos...
+            </div>
+            <div id="produtos-container" class="produtos-grid"></div>
+        </div>
+
+        <div id="message-area"></div>
+    </div>
+
+    <!-- Modal Produto -->
+    <div id="modal-produto" class="modal">
+        <div class="modal-content">
+            <h3 id="modal-titulo"><i class="fas fa-utensils"></i> Novo Produto</h3>
+            <form id="form-produto">
+                <input type="hidden" id="produto-id">
+                
+                <div class="form-group">
+                    <label for="nome"><i class="fas fa-tag"></i> Nome *</label>
+                    <input type="text" id="nome" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="preco"><i class="fas fa-dollar-sign"></i> Preço (R$) *</label>
+                    <input type="number" id="preco" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="descricao"><i class="fas fa-align-left"></i> Descrição</label>
+                    <textarea id="descricao" rows="3"></textarea>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="fecharModal()">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-save"></i> Salvar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script src="js/produtos.js"></script>
+</body>
+</html>
