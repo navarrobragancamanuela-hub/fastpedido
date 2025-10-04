@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FastPedido - Novo Pedido</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-hamburger"></i> FastPedido</h1>
+            <p class="subtitle">Criar novo pedido</p>
+        </header>
+
+        <nav class="main-nav">
+            <a href="index.html" class="nav-link">
+                <i class="fas fa-list"></i> Pedidos
+            </a>
+            <a href="produtos.html" class="nav-link">
+                <i class="fas fa-utensils"></i> Produtos
+            </a>
+            <a href="novo-pedido.html" class="nav-link active">
+                <i class="fas fa-plus-circle"></i> Novo Pedido
+            </a>
+        </nav>
+
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-plus-circle"></i> Novo Pedido</h2>
+            
+            <form id="form-pedido">
+                <div class="form-group">
+                    <label for="cliente"><i class="fas fa-user"></i> Nome do Cliente *</label>
+                    <input type="text" id="cliente" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="status"><i class="fas fa-tag"></i> Status *</label>
+                    <select id="status" required>
+                        <option value="Em preparo">Em preparo</option>
+                        <option value="Pronto">Pronto</option>
+                        <option value="Entregue">Entregue</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label><i class="fas fa-utensils"></i> Itens do Pedido *</label>
+                    <div id="itens-container">
+                        <!-- Itens serão adicionados aqui -->
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="adicionarItem()" style="margin-top: 10px;">
+                        <i class="fas fa-plus"></i> Adicionar Item
+                    </button>
+                </div>
+
+                <div class="form-buttons">
+                    <button type="button" class="btn btn-secondary" onclick="window.location.href='index.html'">
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button type="submit" class="btn btn-primary" id="submit-btn">
+                        <i class="fas fa-save"></i> Criar Pedido
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <div id="message-area"></div>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script src="js/novo-pedido.js"></script>
+</body>
+</html>
