@@ -211,7 +211,7 @@ class MonitorSupabase {
         }
     }
 
-    mostrarNotificacionDegradacao() {
+    mostrarNotificacaoDegradacao() {
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
@@ -378,16 +378,6 @@ setTimeout(async () => {
 window.supabase = supabase;
 window.monitorSupabase = monitorSupabase;
 window.TratadorErrosSupabase = TratadorErrosSupabase;
-
-// Debug helpers para desenvolvimento
-if (process.env.NODE_ENV === 'development') {
-    window.debugSupabase = {
-        verificarConexao: () => verificarConexaoSupabase(),
-        getStatus: () => monitorSupabase.getStatus(),
-        forcarVerificacao: () => monitorSupabase.verificarSaude(),
-        simularErro: () => TratadorErrosSupabase.tratarErro(new Error('Erro simulado'))
-    };
-}
 
 console.log('🎯 Supabase Client refinado carregado com sucesso!');
 console.log('📋 Recursos disponíveis:');

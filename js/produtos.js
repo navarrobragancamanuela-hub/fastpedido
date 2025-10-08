@@ -784,15 +784,3 @@ function debounce(func, wait) {
     };
 }
 
-// Debug helpers
-if (process.env.NODE_ENV === 'development') {
-    window.debugProdutos = {
-        getEstado: () => ({ ...estadoProdutos }),
-        forcarRecarregamento: () => carregarProdutos(),
-        simularProduto: () => ({
-            nome: 'Produto Teste',
-            preco: 29.90,
-            descricao: 'Descrição do produto teste'
-        })
-    };
-}
