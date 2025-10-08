@@ -11,9 +11,7 @@
     
     <!-- Preload para recursos críticos -->
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
-    <link rel="preload" href="css/style.css" as="style">
-    
+  
     <!-- CSS externo -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" 
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
@@ -1764,63 +1762,10 @@ a.skip-link:focus {
         <div id="message-area" role="alert" aria-live="polite"></div>
     </div>
 
-    <!-- Modal Produto -->
-    <div id="modal-produto" class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-titulo" aria-hidden="true">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 id="modal-titulo">
-                    <i class="fas fa-utensils" aria-hidden="true"></i> 
-                    Novo Produto
-                </h3>
-                <button class="btn-close" onclick="fecharModal()" aria-label="Fechar modal">
-                    <i class="fas fa-times" aria-hidden="true"></i>
-                </button>
-            </div>
-            
-            <form id="form-produto" novalidate>
-                <input type="hidden" id="produto-id">
-                
-                <div class="form-group">
-                    <label for="nome">
-                        <i class="fas fa-tag" aria-hidden="true"></i> 
-                        Nome *
-                    </label>
-                    <input type="text" id="nome" required aria-required="true" aria-describedby="nome-error">
-                    <span id="nome-error" class="error-message" aria-live="polite"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="preco">
-                        <i class="fas fa-dollar-sign" aria-hidden="true"></i> 
-                        Preço (R$) *
-                    </label>
-                    <input type="number" id="preco" step="0.01" min="0" required 
-                           aria-required="true" aria-describedby="preco-error">
-                    <span id="preco-error" class="error-message" aria-live="polite"></span>
-                </div>
-                
-                <div class="form-group">
-                    <label for="descricao">
-                        <i class="fas fa-align-left" aria-hidden="true"></i> 
-                        Descrição
-                    </label>
-                    <textarea id="descricao" rows="3" aria-describedby="descricao-help"></textarea>
-                    <small id="descricao-help" class="help-text">Descrição opcional do produto</small>
-                </div>
-
-                <div class="form-buttons">
-                    <button type="button" class="btn btn-secondary" onclick="fecharModal()">
-                        <i class="fas fa-times" aria-hidden="true"></i> 
-                        Cancelar
-                    </button>
-                    <button type="submit" class="btn btn-primary" id="submit-btn">
-                        <i class="fas fa-save" aria-hidden="true"></i> 
-                        Salvar
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
+   <!-- REMOVA o modal antigo e COLE este no lugar -->
+<div id="modal-produto-placeholder"></div>
+<!-- Este div vazio é só para o JavaScript criar o modal dinamicamente -->
+ 
 
     <!-- Scripts no final do body para melhor performance -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>

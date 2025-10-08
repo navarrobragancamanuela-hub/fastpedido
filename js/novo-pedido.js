@@ -604,13 +604,3 @@ function configurarEventListeners() {
 // ===== EXPORTAÇÕES GLOBAIS =====
 window.adicionarItem = adicionarItem;
 window.mostrarMensagem = mostrarMensagem;
-
-// Debug helpers (apenas desenvolvimento)
-if (process.env.NODE_ENV === 'development') {
-    window.estadoApp = estadoApp;
-    window.debugPedido = {
-        getEstado: () => ({ ...estadoApp }),
-        simularErro: () => mostrarMensagem('Mensagem de erro simulada', 'error'),
-        simularSucesso: () => mostrarMensagem('Mensagem de sucesso simulada', 'success')
-    };
-}

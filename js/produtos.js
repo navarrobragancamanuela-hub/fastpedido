@@ -13,13 +13,8 @@ const estadoProdutos = {
     container: null,
     loading: null,
     messageArea: null,
-    form: null,
-    modal: null,
-    submitBtn: null,
     produtos: [],
-    produtoEditando: null,
-    carregando: false,
-    salvando: false
+    carregando: false
 };
 
 // ===== INICIALIZAÇÃO =====
@@ -55,10 +50,7 @@ function inicializarElementosProdutos() {
     const elementos = {
         container: document.getElementById('produtos-container'),
         loading: document.getElementById('loading'),
-        messageArea: document.getElementById('message-area'),
-        form: document.getElementById('form-produto'),
-        modal: document.getElementById('modal-produto'),
-        submitBtn: document.getElementById('submit-btn')
+        messageArea: document.getElementById('message-area')
     };
 
     const elementosFaltantes = Object.entries(elementos)
@@ -76,24 +68,20 @@ function inicializarElementosProdutos() {
 }
 
 /**
- * Configura event listeners do módulo
+ * Configura event listeners do módulo - VERSÃO CORRIGIDA
  */
 function configurarEventListenersProdutos() {
-    estadoProdutos.form.addEventListener('submit', handleSubmitProduto);
-    
-    // Validação em tempo real
-    estadoProdutos.form.addEventListener('input', debounce((e) => {
-        if (e.target.name === 'preco') {
-            validarPrecoEmTempoReal(e.target);
-        }
-    }, PRODUTOS_CONFIG.DEBOUNCE_DELAY));
-    
-    // Fechar modal com ESC
-    document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && estadoProdutos.modal.style.display === 'flex') {
-            fecharModalProduto();
-        }
-    });
+    // Configurar botão de novo produto se existir
+    const btnNovoProduto = document.getElementById('btn-novo-produto');
+    if (btnNovoProduto) {
+        btnNovoProduto.addEventListener('click', () => abrirModalProduto());
+    }
+
+    // Configurar botão de adicionar produto se existir
+    const btnAdicionarProduto = document.getElementById('btn-adicionar-produto');
+    if (btnAdicionarProduto) {
+        btnAdicionarProduto.addEventListener('click', () => abrirModalProduto());
+    }
     
     console.log('🎯 Event listeners configurados');
 }
@@ -190,37 +178,42 @@ function criarCardProduto(produto) {
     const dataCriacao = produto.created_at ? formatarDataRelativa(produto.created_at) : 'Data não disponível';
     
     card.innerHTML = `
-        <div class="item-card__content">
-            <h3 class="item-card__title">${escapeHTML(produto.nome)}</h3>
-            
-            <div class="produto-preco">
+        <div class="produto-card__header">
+            <div class="produto-card__badge">
+                <i class="fas fa-utensils"></i>
+            </div>
+            <h3 class="produto-card__title">${escapeHTML(produto.nome)}</h3>
+        </div>
+        
+        <div class="produto-card__content">
+            <div class="produto-card__preco">
                 ${formatarMoeda(produto.preco)}
             </div>
             
-            <div class="produto-descricao">
+            <div class="produto-card__descricao">
                 ${escapeHTML(descricao)}
             </div>
             
-            <div class="produto-metadata">
-                <small class="metadata-item">
+            <div class="produto-card__metadata">
+                <span class="metadata-item">
                     <i class="fas fa-calendar"></i>
                     ${dataCriacao}
-                </small>
+                </span>
                 ${produto.descricao ? `
-                <small class="metadata-item">
+                <span class="metadata-item">
                     <i class="fas fa-file-alt"></i>
                     Com descrição
-                </small>
+                </span>
                 ` : ''}
             </div>
         </div>
 
-        <div class="actions">
-            <button class="btn btn-warning btn--sm" onclick="editarProduto(${produto.id})"
+        <div class="produto-card__actions">
+            <button class="btn btn-editar" onclick="editarProduto(${produto.id})"
                     aria-label="Editar produto ${produto.nome}">
                 <i class="fas fa-edit"></i> Editar
             </button>
-            <button class="btn btn-danger btn--sm" onclick="excluirProduto(${produto.id})"
+            <button class="btn btn-excluir" onclick="excluirProduto(${produto.id})"
                     aria-label="Excluir produto ${produto.nome}">
                 <i class="fas fa-trash"></i> Excluir
             </button>
@@ -234,178 +227,317 @@ function criarCardProduto(produto) {
     return card;
 }
 
-// ===== GERENCIAMENTO DO MODAL =====
+// ===== FORMULÁRIO DE PRODUTO - VERSÃO PREMIUM =====
 /**
- * Abre modal para criar/editar produto
+ * Abre modal para adicionar/editar produto - VERSÃO PREMIUM
  */
 window.abrirModalProduto = function(produto = null) {
-    estadoProdutos.produtoEditando = produto;
-    
-    const modalTitulo = document.getElementById('modal-titulo');
     const isEditando = !!produto;
     
-    // Configurar título e botão
-    modalTitulo.innerHTML = isEditando ? 
-        '<i class="fas fa-edit"></i> Editar Produto' : 
-        '<i class="fas fa-plus"></i> Novo Produto';
-    
-    estadoProdutos.submitBtn.innerHTML = isEditando ? 
-        '<i class="fas fa-save"></i> Atualizar Produto' : 
-        '<i class="fas fa-save"></i> Salvar Produto';
-    
-    // Preencher formulário se estiver editando
-    if (isEditando) {
-        preencherFormularioProduto(produto);
-    } else {
-        estadoProdutos.form.reset();
-        document.getElementById('produto-id').value = '';
-    }
-    
-    // Mostrar modal com animação
-    estadoProdutos.modal.style.display = 'flex';
-    setTimeout(() => estadoProdutos.modal.classList.add('modal--active'), 10);
-    
-    // Foco no primeiro campo
-    setTimeout(() => document.getElementById('nome').focus(), 100);
-    
-    console.log(`📝 ${isEditando ? 'Editando' : 'Criando'} produto`, produto);
-};
-
-/**
- * Preenche formulário com dados do produto
- */
-function preencherFormularioProduto(produto) {
-    document.getElementById('produto-id').value = produto.id;
-    document.getElementById('nome').value = produto.nome;
-    document.getElementById('preco').value = produto.preco;
-    document.getElementById('descricao').value = produto.descricao || '';
-}
-
-/**
- * Fecha modal de produto
- */
-window.fecharModal = function() {
-    estadoProdutos.modal.classList.remove('modal--active');
-    
-    setTimeout(() => {
-        estadoProdutos.modal.style.display = 'none';
-        estadoProdutos.form.reset();
-        estadoProdutos.produtoEditando = null;
-        document.getElementById('produto-id').value = '';
-    }, 300);
-    
-    console.log('❌ Modal fechado');
-};
-
-// ===== VALIDAÇÃO DE FORMULÁRIO =====
-/**
- * Valida dados do produto antes do envio
- */
-function validarDadosProduto(dados) {
-    const erros = [];
-    
-    // Validar nome
-    if (!dados.nome || dados.nome.trim().length === 0) {
-        erros.push('O nome do produto é obrigatório');
-    } else if (dados.nome.length > PRODUTOS_CONFIG.NOME_MAX_LENGTH) {
-        erros.push(`O nome deve ter no máximo ${PRODUTOS_CONFIG.NOME_MAX_LENGTH} caracteres`);
-    }
-    
-    // Validar preço
-    if (!dados.preco && dados.preco !== 0) {
-        erros.push('O preço do produto é obrigatório');
-    } else if (dados.preco < PRODUTOS_CONFIG.PRECO_MINIMO) {
-        erros.push(`O preço não pode ser menor que ${formatarMoeda(PRODUTOS_CONFIG.PRECO_MINIMO)}`);
-    } else if (dados.preco > PRODUTOS_CONFIG.PRECO_MAXIMO) {
-        erros.push(`O preço não pode ser maior que ${formatarMoeda(PRODUTOS_CONFIG.PRECO_MAXIMO)}`);
-    }
-    
-    // Validar descrição
-    if (dados.descricao && dados.descricao.length > PRODUTOS_CONFIG.DESCRICAO_MAX_LENGTH) {
-        erros.push(`A descrição deve ter no máximo ${PRODUTOS_CONFIG.DESCRICAO_MAX_LENGTH} caracteres`);
-    }
-    
-    return erros;
-}
-
-/**
- * Valida preço em tempo real
- */
-function validarPrecoEmTempoReal(input) {
-    const valor = parseFloat(input.value);
-    const grupo = input.closest('.form-group');
-    
-    // Limpar estados anteriores
-    grupo.classList.remove('form-group--error', 'form-group--success');
-    
-    if (isNaN(valor)) {
-        grupo.classList.add('form-group--error');
-        return false;
-    }
-    
-    if (valor < PRODUTOS_CONFIG.PRECO_MINIMO) {
-        grupo.classList.add('form-group--error');
-        return false;
-    }
-    
-    if (valor > PRODUTOS_CONFIG.PRECO_MAXIMO) {
-        grupo.classList.add('form-group--error');
-        return false;
-    }
-    
-    grupo.classList.add('form-group--success');
-    return true;
-}
-
-// ===== SUBMISSÃO DO FORMULÁRIO =====
-/**
- * Manipula o envio do formulário de produto
- */
-async function handleSubmitProduto(event) {
-    event.preventDefault();
-    
-    if (estadoProdutos.salvando) {
-        console.warn('⚠️ Salvamento já em andamento');
-        return;
+    // Fechar modal anterior se existir
+    const modalAnterior = document.querySelector('.modal-produto-form');
+    if (modalAnterior) {
+        modalAnterior.remove();
     }
 
-    try {
-        estadoProdutos.salvando = true;
-        atualizarInterfaceSalvamento(true);
+    const modal = document.createElement('div');
+    modal.className = 'modal modal-produto-form';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 10000;
+        backdrop-filter: blur(5px);
+    `;
+
+    modal.innerHTML = `
+        <div style="
+            background: linear-gradient(145deg, #ffffff, #f8f9fa);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            border: 3px solid ${isEditando ? '#3498db' : '#2ed573'};
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        ">
+            <div style="display: flex; align-items: center; gap: 15px; margin-bottom: 25px; padding-bottom: 15px; border-bottom: 2px solid ${isEditando ? '#3498db' : '#2ed573'};">
+                <div style="font-size: 2.5rem; color: ${isEditando ? '#3498db' : '#2ed573'};">
+                    <i class="fas ${isEditando ? 'fa-edit' : 'fa-plus-circle'}"></i>
+                </div>
+                <h3 style="color: #2c3e50; font-size: 1.5rem; font-weight: 800; margin: 0;">
+                    ${isEditando ? 'Editar Produto' : 'Novo Produto'}
+                </h3>
+            </div>
+            
+            <form id="form-produto" style="display: flex; flex-direction: column; gap: 20px;">
+                <input type="hidden" id="produto-id" value="${produto?.id || ''}">
+                
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="color: #2c3e50; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-tag" style="color: #e74c3c;"></i>
+                        Nome do Produto
+                        <span style="color: #e74c3c;">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="nome" 
+                        value="${produto ? escapeHTML(produto.nome) : ''}"
+                        placeholder="Ex: X-Burger, Batata Frita, Refrigerante..."
+                        required
+                        style="
+                            padding: 15px;
+                            border: 2px solid #bdc3c7;
+                            border-radius: 12px;
+                            font-size: 1rem;
+                            font-family: inherit;
+                            transition: all 0.3s ease;
+                            background: white;
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        "
+                        onfocus="this.style.borderColor='#3498db'; this.style.boxShadow='0 0 0 3px rgba(52, 152, 219, 0.1), inset 0 2px 4px rgba(0,0,0,0.05)'"
+                        onblur="this.style.borderColor='#bdc3c7'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.05)'"
+                    >
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="color: #2c3e50; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-money-bill-wave" style="color: #27ae60;"></i>
+                        Preço (R$)
+                        <span style="color: #e74c3c;">*</span>
+                    </label>
+                    <div style="position: relative;">
+                        <span style="
+                            position: absolute;
+                            left: 15px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            color: #7f8c8d;
+                            font-weight: 600;
+                            z-index: 2;
+                        ">R$</span>
+                        <input 
+                            type="number" 
+                            id="preco" 
+                            value="${produto ? produto.preco : ''}"
+                            step="0.01"
+                            min="0.01"
+                            placeholder="0.00"
+                            required
+                            style="
+                                padding: 15px 15px 15px 40px;
+                                border: 2px solid #bdc3c7;
+                                border-radius: 12px;
+                                font-size: 1rem;
+                                font-family: inherit;
+                                transition: all 0.3s ease;
+                                background: white;
+                                box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                                width: 100%;
+                            "
+                            onfocus="this.style.borderColor='#3498db'; this.style.boxShadow='0 0 0 3px rgba(52, 152, 219, 0.1), inset 0 2px 4px rgba(0,0,0,0.05)'"
+                            onblur="this.style.borderColor='#bdc3c7'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.05)'"
+                        >
+                    </div>
+                </div>
+                
+                <div style="display: flex; flex-direction: column; gap: 8px;">
+                    <label style="color: #2c3e50; font-weight: 700; font-size: 1rem; display: flex; align-items: center; gap: 8px;">
+                        <i class="fas fa-align-left" style="color: #9b59b6;"></i>
+                        Descrição
+                    </label>
+                    <textarea 
+                        id="descricao" 
+                        rows="4"
+                        placeholder="Descreva o produto, ingredientes, tamanho..."
+                        style="
+                            padding: 15px;
+                            border: 2px solid #bdc3c7;
+                            border-radius: 12px;
+                            font-size: 1rem;
+                            font-family: inherit;
+                            transition: all 0.3s ease;
+                            background: white;
+                            resize: vertical;
+                            min-height: 100px;
+                            box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+                        "
+                        onfocus="this.style.borderColor='#3498db'; this.style.boxShadow='0 0 0 3px rgba(52, 152, 219, 0.1), inset 0 2px 4px rgba(0,0,0,0.05)'"
+                        onblur="this.style.borderColor='#bdc3c7'; this.style.boxShadow='inset 0 2px 4px rgba(0,0,0,0.05)'"
+                    >${produto?.descricao ? escapeHTML(produto.descricao) : ''}</textarea>
+                    <div style="color: #7f8c8d; font-size: 0.85rem; display: flex; justify-content: space-between;">
+                        <span>Opcional</span>
+                        <span id="contador-descricao">0/500</span>
+                    </div>
+                </div>
+                
+                <div style="
+                    display: flex;
+                    gap: 15px;
+                    justify-content: flex-end;
+                    margin-top: 10px;
+                    padding-top: 20px;
+                    border-top: 1px solid rgba(0,0,0,0.1);
+                ">
+                    <button 
+                        type="button" 
+                        onclick="window.fecharModalProduto()" 
+                        style="
+                            background: #7f8c8d;
+                            color: white;
+                            border: 2px solid #7f8c8d;
+                            padding: 12px 25px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            font-weight: 700;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                            min-width: 100px;
+                        "
+                        onmouseover="this.style.background='#636e72'; this.style.borderColor='#636e72'"
+                        onmouseout="this.style.background='#7f8c8d'; this.style.borderColor='#7f8c8d'"
+                    >
+                        <i class="fas fa-times"></i> Cancelar
+                    </button>
+                    <button 
+                        type="submit" 
+                        id="btn-salvar-produto"
+                        style="
+                            background: linear-gradient(135deg, ${isEditando ? '#3498db, #2980b9' : '#2ed573, #27ae60'});
+                            color: white;
+                            border: 2px solid ${isEditando ? '#2980b9' : '#27ae60'};
+                            padding: 12px 25px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            font-weight: 700;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                            min-width: 100px;
+                            position: relative;
+                            overflow: hidden;
+                        "
+                        onmouseover="this.style.background='linear-gradient(135deg, ${isEditando ? '#2980b9, #21618c' : '#27ae60, #219a52'})'; this.style.borderColor='${isEditando ? '#21618c' : '#219a52'}'"
+                        onmouseout="this.style.background='linear-gradient(135deg, ${isEditando ? '#3498db, #2980b9' : '#2ed573, #27ae60'})'; this.style.borderColor='${isEditando ? '#2980b9' : '#27ae60'}'"
+                    >
+                        <i class="fas ${isEditando ? 'fa-save' : 'fa-plus'}"></i>
+                        ${isEditando ? ' Salvar' : ' Adicionar'}
+                    </button>
+                </div>
+            </form>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Configurar o formulário
+    const form = modal.querySelector('#form-produto');
+    const descricaoTextarea = modal.querySelector('#descricao');
+    const contadorDescricao = modal.querySelector('#contador-descricao');
+    const btnSalvar = modal.querySelector('#btn-salvar-produto');
+
+    // Contador de caracteres para descrição
+    if (descricaoTextarea && contadorDescricao) {
+        const atualizarContador = () => {
+            const comprimento = descricaoTextarea.value.length;
+            contadorDescricao.textContent = `${comprimento}/500`;
+            
+            if (comprimento > 500) {
+                contadorDescricao.style.color = '#e74c3c';
+            } else if (comprimento > 400) {
+                contadorDescricao.style.color = '#f39c12';
+            } else {
+                contadorDescricao.style.color = '#7f8c8d';
+            }
+        };
+
+        descricaoTextarea.addEventListener('input', atualizarContador);
+        atualizarContador(); // Inicializar contador
+    }
+
+    form.addEventListener('submit', async function(e) {
+        e.preventDefault();
         
-        const dados = coletarDadosFormulario();
-        const errosValidacao = validarDadosProduto(dados);
+        if (btnSalvar.disabled) return;
         
-        if (errosValidacao.length > 0) {
-            mostrarMensagemProdutos(errosValidacao[0], 'error');
-            return;
+        btnSalvar.disabled = true;
+        btnSalvar.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
+
+        try {
+            const dados = {
+                id: document.getElementById('produto-id').value,
+                nome: document.getElementById('nome').value.trim(),
+                preco: parseFloat(document.getElementById('preco').value),
+                descricao: document.getElementById('descricao').value.trim()
+            };
+
+            // Validações
+            if (!dados.nome) {
+                mostrarMensagemProdutos('Nome do produto é obrigatório', 'error');
+                return;
+            }
+
+            if (!dados.preco || dados.preco <= 0) {
+                mostrarMensagemProdutos('Preço deve ser maior que zero', 'error');
+                return;
+            }
+
+            if (dados.descricao.length > 500) {
+                mostrarMensagemProdutos('Descrição muito longa (máx. 500 caracteres)', 'error');
+                return;
+            }
+
+            await salvarProduto(dados);
+            window.fecharModalProduto();
+            
+        } catch (error) {
+            console.error('❌ Erro ao salvar produto:', error);
+            mostrarMensagemProdutos(error.message, 'error');
+        } finally {
+            btnSalvar.disabled = false;
+            btnSalvar.innerHTML = `<i class="fas ${isEditando ? 'fa-save' : 'fa-plus'}"></i> ${isEditando ? ' Salvar' : ' Adicionar'}`;
         }
-        
-        await salvarProduto(dados);
-        
-    } catch (error) {
-        console.error('❌ Erro no processamento do produto:', error);
-        mostrarMensagemProdutos(`Erro: ${error.message}`, 'error');
-    } finally {
-        estadoProdutos.salvando = false;
-        atualizarInterfaceSalvamento(false);
-    }
-}
+    });
 
-/**
- * Coleta dados do formulário
- */
-function coletarDadosFormulario() {
-    return {
-        id: document.getElementById('produto-id').value,
-        nome: document.getElementById('nome').value.trim(),
-        preco: parseFloat(document.getElementById('preco').value),
-        descricao: document.getElementById('descricao').value.trim()
+    // Definir a função globalmente para fechar
+    window.fecharModalProduto = () => {
+        const modal = document.querySelector('.modal-produto-form');
+        if (modal) {
+            modal.remove();
+        }
+        window.fecharModalProduto = null;
     };
-}
+
+    // Fechar modal ao clicar fora
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            window.fecharModalProduto();
+        }
+    });
+
+    // Fechar com ESC
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            window.fecharModalProduto();
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+
+    // Focar no primeiro campo
+    setTimeout(() => {
+        const nomeInput = modal.querySelector('#nome');
+        if (nomeInput) nomeInput.focus();
+    }, 100);
+};
 
 /**
- * Salva produto no Supabase (cria ou atualiza)
+ * Salva produto no Supabase (cria ou atualiza) - VERSÃO PREMIUM
  */
 async function salvarProduto(dados) {
     const isEditando = !!dados.id;
@@ -425,10 +557,7 @@ async function salvarProduto(dados) {
             // Atualizar produto existente
             const { data, error } = await supabase
                 .from('produtos')
-                .update({
-                    ...produtoData,
-                    atualizado_em: new Date().toISOString()
-                })
+                .update(produtoData)
                 .eq('id', dados.id)
                 .select()
                 .single();
@@ -449,12 +578,11 @@ async function salvarProduto(dados) {
 
         console.log('✅ Produto salvo:', resultado);
         mostrarMensagemProdutos(
-            `Produto ${isEditando ? 'atualizado' : 'criado'} com sucesso!`, 
+            `Produto ${isEditando ? 'atualizado' : 'criado'} com sucesso! 🎉`, 
             'success'
         );
 
-        // Fechar modal e recarregar lista
-        fecharModal();
+        // Recarregar lista
         await carregarProdutos();
 
     } catch (error) {
@@ -473,71 +601,196 @@ async function salvarProduto(dados) {
     }
 }
 
-// ===== EXCLUSÃO DE PRODUTOS =====
+// ===== EDIÇÃO DE PRODUTOS =====
 /**
- * Gerencia exclusão de produto com confirmação
+ * Interface para edição de produto - VERSÃO SIMPLIFICADA
  */
-window.excluirProduto = async function(produtoId) {
+window.editarProduto = async function(produtoId) {
     const produto = estadoProdutos.produtos.find(p => p.id === produtoId);
     if (!produto) {
         mostrarMensagemProdutos('Produto não encontrado', 'error');
         return;
     }
 
-    const confirmado = await mostrarConfirmacaoExclusaoProduto(produto);
-    if (!confirmado) return;
+    // Usar a mesma função de modal para edição
+    abrirModalProduto(produto);
+};
 
-    await executarExclusaoProduto(produtoId);
+// ===== EXCLUSÃO DE PRODUTOS =====
+/**
+ * Gerencia exclusão de produto com confirmação - VERSÃO CORRIGIDA
+ */
+window.excluirProduto = async function(produtoId) {
+    // Prevenir múltiplos cliques
+    if (window.exclusaoEmAndamento) {
+        console.log('⏳ Exclusão já em andamento...');
+        return;
+    }
+    
+    window.exclusaoEmAndamento = true;
+
+    try {
+        const produto = estadoProdutos.produtos.find(p => p.id === produtoId);
+        if (!produto) {
+            mostrarMensagemProdutos('Produto não encontrado', 'error');
+            return;
+        }
+
+        const confirmado = await mostrarConfirmacaoExclusaoProduto(produto);
+        if (!confirmado) return;
+
+        await executarExclusaoProduto(produtoId);
+        
+    } catch (error) {
+        console.error('❌ Erro na exclusão:', error);
+    } finally {
+        window.exclusaoEmAndamento = false;
+    }
 };
 
 /**
- * Mostra modal de confirmação de exclusão
+ * Mostra modal de confirmação de exclusão - VERSÃO CORRIGIDA
  */
 async function mostrarConfirmacaoExclusaoProduto(produto) {
     return new Promise((resolve) => {
+        // Fechar modal anterior se existir
+        const modalAnterior = document.querySelector('.modal-exclusao-produto');
+        if (modalAnterior) {
+            modalAnterior.remove();
+        }
+
         const modal = document.createElement('div');
-        modal.className = 'modal';
+        modal.className = 'modal modal-exclusao-produto';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+        `;
+
         modal.innerHTML = `
-            <div class="modal__content">
-                <div class="confirmacao-exclusao">
-                    <i class="fas fa-exclamation-triangle confirmacao-exclusao__icone"></i>
-                    <h3>Confirmar Exclusão</h3>
-                    <p>Tem certeza que deseja excluir o produto <strong>"${escapeHTML(produto.nome)}"</strong>?</p>
-                    <p class="confirmacao-exclusao__detalhes">
-                        Preço: <strong>${formatarMoeda(produto.preco)}</strong><br>
-                        ${produto.descricao ? `Descrição: ${escapeHTML(produto.descricao.substring(0, 100))}${produto.descricao.length > 100 ? '...' : ''}` : 'Sem descrição'}
-                    </p>
-                    <p class="confirmacao-exclusao__aviso">
-                        <i class="fas fa-info-circle"></i>
-                        ${produto.id <= 4 ? 'Produtos iniciais não podem ser excluídos' : 'Esta ação não pode ser desfeita.'}
-                    </p>
+            <div style="
+                background: linear-gradient(145deg, #ffffff, #f8f9fa);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                border: 3px solid #e74c3c;
+                max-width: 500px;
+                width: 90%;
+                text-align: center;
+            ">
+                <div style="font-size: 4rem; color: #e74c3c; margin-bottom: 20px;">
+                    <i class="fas fa-exclamation-triangle"></i>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="fecharConfirmacaoExclusaoProduto(false)">
-                        Cancelar
+                <h3 style="color: #2c3e50; font-size: 1.5rem; font-weight: 800; margin-bottom: 15px;">
+                    Confirmar Exclusão
+                </h3>
+                
+                <p style="color: #7f8c8d; margin-bottom: 20px; font-size: 1.1rem;">
+                    Tem certeza que deseja excluir o produto <strong>"${escapeHTML(produto.nome)}"</strong>?
+                </p>
+                
+                <div style="background: rgba(231, 76, 60, 0.1); padding: 15px; border-radius: 10px; margin-bottom: 25px; border-left: 4px solid #e74c3c;">
+                    <p style="margin: 5px 0; color: #2c3e50; font-weight: 600;">
+                        <i class="fas fa-tag"></i> Nome: ${escapeHTML(produto.nome)}
+                    </p>
+                    <p style="margin: 5px 0; color: #2c3e50; font-weight: 600;">
+                        <i class="fas fa-money-bill-wave"></i> Preço: ${formatarMoeda(produto.preco)}
+                    </p>
+                    ${produto.descricao ? `
+                    <p style="margin: 5px 0; color: #2c3e50; font-weight: 600;">
+                        <i class="fas fa-align-left"></i> Descrição: ${escapeHTML(produto.descricao.substring(0, 100))}${produto.descricao.length > 100 ? '...' : ''}
+                    </p>
+                    ` : ''}
+                </div>
+                
+                <p style="color: #e74c3c; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px;">
+                    <i class="fas fa-info-circle"></i>
+                    ${produto.id <= 4 ? 'Produtos iniciais não podem ser excluídos' : 'Esta ação não pode ser desfeita.'}
+                </p>
+                
+                <div style="display: flex; gap: 15px; justify-content: center;">
+                    <button 
+                        type="button" 
+                        onclick="window.fecharModalExclusaoProduto(false)" 
+                        style="
+                            background: #7f8c8d;
+                            color: white;
+                            border: 2px solid #7f8c8d;
+                            padding: 12px 30px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            font-weight: 700;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                            min-width: 120px;
+                        "
+                    >
+                        <i class="fas fa-times"></i> Cancelar
                     </button>
-                    <button type="button" class="btn btn-danger" onclick="fecharConfirmacaoExclusaoProduto(true)"
-                            ${produto.id <= 4 ? 'disabled' : ''}>
-                        <i class="fas fa-trash"></i> Excluir Produto
+                    <button 
+                        type="button" 
+                        onclick="window.fecharModalExclusaoProduto(true)" 
+                        style="
+                            background: linear-gradient(135deg, #e74c3c, #c0392b);
+                            color: white;
+                            border: 2px solid #c0392b;
+                            padding: 12px 30px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            font-weight: 700;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                            min-width: 120px;
+                            ${produto.id <= 4 ? 'opacity: 0.5; cursor: not-allowed;' : ''}
+                        "
+                        ${produto.id <= 4 ? 'disabled' : ''}
+                    >
+                        <i class="fas fa-trash"></i> Excluir
                     </button>
                 </div>
             </div>
         `;
 
         document.body.appendChild(modal);
-        modal.style.display = 'flex';
 
-        window.fecharConfirmacaoExclusaoProduto = (resultado) => {
-            modal.remove();
-            window.fecharConfirmacaoExclusaoProduto = null;
-            resolve(resultado);
+        // Definir a função globalmente
+        window.fecharModalExclusaoProduto = (confirmado) => {
+            const modal = document.querySelector('.modal-exclusao-produto');
+            if (modal) {
+                modal.remove();
+            }
+            window.fecharModalExclusaoProduto = null;
+            resolve(confirmado);
         };
+
+        // Fechar modal ao clicar fora
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                window.fecharModalExclusaoProduto(false);
+            }
+        });
+
+        // Fechar com ESC
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                window.fecharModalExclusaoProduto(false);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
     });
 }
 
 /**
- * Executa exclusão do produto no Supabase
+ * Executa exclusão do produto no Supabase - VERSÃO CORRIGIDA
  */
 async function executarExclusaoProduto(produtoId) {
     try {
@@ -557,6 +810,9 @@ async function executarExclusaoProduto(produtoId) {
         // Remover da interface
         removerProdutoDaInterface(produtoId);
         
+        // Recarregar produtos para atualizar a lista
+        await carregarProdutos();
+        
     } catch (error) {
         console.error('❌ Erro ao excluir produto:', error);
         
@@ -568,6 +824,7 @@ async function executarExclusaoProduto(produtoId) {
         } else {
             mostrarMensagemProdutos(`Erro ao excluir produto: ${error.message}`, 'error');
         }
+        throw error;
     }
 }
 
@@ -589,35 +846,8 @@ function removerProdutoDaInterface(produtoId) {
                 exibirEstadoVazioProdutos();
             }
         }, 300);
-    } else {
-        // Fallback: recarregar
-        carregarProdutos();
     }
 }
-
-// ===== EDIÇÃO DE PRODUTOS =====
-/**
- * Carrega produto para edição
- */
-window.editarProduto = async function(produtoId) {
-    try {
-        console.log(`✏️ Carregando produto ${produtoId} para edição`);
-        
-        const { data: produto, error } = await supabase
-            .from('produtos')
-            .select('*')
-            .eq('id', produtoId)
-            .single();
-
-        if (error) throw error;
-
-        abrirModalProduto(produto);
-
-    } catch (error) {
-        console.error('❌ Erro ao carregar produto:', error);
-        mostrarMensagemProdutos('Erro ao carregar produto para edição', 'error');
-    }
-};
 
 // ===== GERENCIAMENTO DE INTERFACE =====
 /**
@@ -633,26 +863,6 @@ function mostrarEstadoCarregamentoProdutos(carregando) {
                 <p>Carregando produtos...</p>
             `;
         }
-    }
-}
-
-/**
- * Atualiza interface durante salvamento
- */
-function atualizarInterfaceSalvamento(salvando) {
-    if (salvando) {
-        estadoProdutos.submitBtn.disabled = true;
-        estadoProdutos.submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Salvando...';
-        estadoProdutos.submitBtn.classList.add('btn--processing');
-    } else {
-        estadoProdutos.submitBtn.disabled = false;
-        
-        const texto = estadoProdutos.produtoEditando ? 
-            '<i class="fas fa-save"></i> Atualizar Produto' : 
-            '<i class="fas fa-save"></i> Salvar Produto';
-            
-        estadoProdutos.submitBtn.innerHTML = texto;
-        estadoProdutos.submitBtn.classList.remove('btn--processing');
     }
 }
 
@@ -781,18 +991,5 @@ function debounce(func, wait) {
         };
         clearTimeout(timeout);
         timeout = setTimeout(later, wait);
-    };
-}
-
-// Debug helpers
-if (process.env.NODE_ENV === 'development') {
-    window.debugProdutos = {
-        getEstado: () => ({ ...estadoProdutos }),
-        forcarRecarregamento: () => carregarProdutos(),
-        simularProduto: () => ({
-            nome: 'Produto Teste',
-            preco: 29.90,
-            descricao: 'Descrição do produto teste'
-        })
     };
 }

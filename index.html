@@ -15,8 +15,6 @@
     
     <!-- Preload de recursos críticos -->
     <link rel="preload" href="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" as="script">
-    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" as="style">
-    <link rel="preload" href="css/style.css" as="style">
     
     <!-- CDN de dependências -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -26,6 +24,58 @@
     
     <!-- CSS personalizado -->
     <style>
+
+/* ===== 🔧 ESTILOS PARA MODAIS ===== */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 10000;
+    backdrop-filter: blur(5px);
+}
+
+.modal__content {
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+    max-width: 500px;
+    width: 90%;
+    margin: 50px auto;
+    padding: 30px;
+}
+
+.status-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.status-option {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 18px 20px;
+    background: #f8f9fa;
+    border: 2px solid #bdc3c7;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.status-option:hover {
+    transform: translateX(5px);
+    border-color: #ffa502;
+}
+
+.status-option--active {
+    border-color: #2ed573;
+    background: rgba(46, 213, 115, 0.1);
+}
+
 /* ===== 🌟 CSS ULTRA PREMIUM V2 - TEMA RETRO LANCHONETE DELUXE 🌟 ===== */
 
 /* 🎨 PALETA DE CORES PREMIUM - ATUALIZADA */
@@ -1309,8 +1359,7 @@ a.skip-link:focus {
   border: 3px solid var(--branco-gelo) !important;
   animation: buttonPulse 2s infinite !important;
 }
-</style>
-<style>
+
 /* ===== 🔧 CORREÇÕES DE FUNCIONALIDADE - MODAL STATUS ===== */
 
 /* MODAL DE STATUS FUNCIONAL */
@@ -1998,6 +2047,8 @@ a.skip-link:focus {
     <script>
         // Configurações iniciais
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 FastPedido inicializando...');
+            
             // Inicializar funcionalidades adicionais
             inicializarFuncionalidadesExtras();
             
@@ -2006,6 +2057,13 @@ a.skip-link:focus {
             
             // Atualizar informações do sistema
             atualizarInformacoesSistema();
+            
+            // Forçar carregamento inicial de pedidos
+            setTimeout(() => {
+                if (typeof carregarPedidos === 'function') {
+                    carregarPedidos();
+                }
+            }, 1000);
         });
 
         // Funcionalidades extras para a página inicial
@@ -2022,7 +2080,9 @@ a.skip-link:focus {
             const refreshBtn = document.getElementById('refresh-btn');
             if (refreshBtn) {
                 refreshBtn.addEventListener('click', function() {
-                    carregarPedidos();
+                    if (typeof carregarPedidos === 'function') {
+                        carregarPedidos();
+                    }
                     this.classList.add('btn--loading');
                     setTimeout(() => this.classList.remove('btn--loading'), 1000);
                 });
@@ -2035,7 +2095,7 @@ a.skip-link:focus {
         function configurarAutoRefresh() {
             // Auto-refresh a cada 30 segundos
             setInterval(() => {
-                if (!document.hidden) {
+                if (!document.hidden && typeof carregarPedidos === 'function') {
                     carregarPedidos();
                     atualizarInformacoesSistema();
                 }
@@ -2044,8 +2104,10 @@ a.skip-link:focus {
 
         function atualizarInformacoesSistema() {
             const agora = new Date();
-            document.getElementById('last-update').textContent = 
-                `Atualizado: ${agora.toLocaleTimeString('pt-BR')}`;
+            const lastUpdate = document.getElementById('last-update');
+            if (lastUpdate) {
+                lastUpdate.textContent = `Atualizado: ${agora.toLocaleTimeString('pt-BR')}`;
+            }
         }
 
         function atualizarContadoresNavegacao() {
@@ -2058,11 +2120,14 @@ a.skip-link:focus {
             let visiveis = 0;
             
             cards.forEach(card => {
-                const cardStatus = card.querySelector('.badge').textContent;
-                const deveMostrar = status === 'all' || cardStatus === status;
-                
-                card.style.display = deveMostrar ? 'block' : 'none';
-                if (deveMostrar) visiveis++;
+                const badge = card.querySelector('.badge');
+                if (badge) {
+                    const cardStatus = badge.textContent;
+                    const deveMostrar = status === 'all' || cardStatus === status;
+                    
+                    card.style.display = deveMostrar ? 'block' : 'none';
+                    if (deveMostrar) visiveis++;
+                }
             });
             
             // Mostrar/ocultar estado vazio
@@ -2074,14 +2139,18 @@ a.skip-link:focus {
 
         function mostrarSobre() {
             const modal = document.getElementById('about-modal');
-            modal.style.display = 'flex';
-            modal.setAttribute('aria-hidden', 'false');
+            if (modal) {
+                modal.style.display = 'flex';
+                modal.setAttribute('aria-hidden', 'false');
+            }
         }
 
         function fecharModalSobre() {
             const modal = document.getElementById('about-modal');
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
+            if (modal) {
+                modal.style.display = 'none';
+                modal.setAttribute('aria-hidden', 'true');
+            }
         }
 
         // Fechar modal com ESC

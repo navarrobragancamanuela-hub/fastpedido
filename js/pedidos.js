@@ -6,6 +6,51 @@ const PEDIDOS_CONFIG = {
     STATUS_OPCOES: ['Em preparo', 'Pronto', 'Entregue']
 };
 
+/**
+ * Atualiza os cards de estatísticas na tela
+ */
+function atualizarEstatisticasNaTela(pedidos) {
+    const totalPedidos = pedidos.length;
+    const pedidosPreparo = pedidos.filter(p => p.status === 'Em preparo').length;
+    const pedidosProntos = pedidos.filter(p => p.status === 'Pronto').length;
+    const pedidosEntregues = pedidos.filter(p => p.status === 'Entregue').length;
+    
+    const valorTotal = pedidos.reduce((total, pedido) => {
+        return total + pedido.item_pedido.reduce((sum, item) => 
+            sum + (item.quantidade * item.produtos.preco), 0
+        );
+    }, 0);
+
+    // Atualizar os elementos na tela
+    const elementos = {
+        'total-pedidos': totalPedidos,
+        'pedidos-preparo': pedidosPreparo,
+        'pedidos-prontos': pedidosProntos,
+        'pedidos-entregues': pedidosEntregues
+    };
+
+    // Atualizar cada elemento
+    Object.entries(elementos).forEach(([id, valor]) => {
+        const elemento = document.getElementById(id);
+        if (elemento) {
+            elemento.textContent = valor;
+        }
+    });
+
+    // Atualizar também os badges de contagem na navegação
+    const pedidosCount = document.getElementById('pedidos-count');
+    if (pedidosCount) {
+        pedidosCount.textContent = totalPedidos;
+    }
+
+    console.log(`📊 Estatísticas atualizadas na tela:
+    • Total: ${totalPedidos} pedidos
+    • Em preparo: ${pedidosPreparo}
+    • Prontos: ${pedidosProntos} 
+    • Entregues: ${pedidosEntregues}
+    • Valor total: R$ ${valorTotal.toFixed(2)}`);
+}
+
 // ===== ESTADO DA APLICAÇÃO =====
 const estadoPedidos = {
     container: null,
@@ -101,15 +146,18 @@ async function carregarPedidos() {
         estadoPedidos.pedidos = pedidos || [];
         
         if (estadoPedidos.pedidos.length === 0) {
-            exibirEstadoVazio();
-            console.log('ℹ️ Nenhum pedido encontrado');
-        } else {
-            renderizarPedidos(estadoPedidos.pedidos);
-            console.log(`✅ ${estadoPedidos.pedidos.length} pedidos carregados`);
-            
-            // Log estatísticas
-            logEstatisticasPedidos(estadoPedidos.pedidos);
-        }
+    exibirEstadoVazio();
+    console.log('ℹ️ Nenhum pedido encontrado');
+} else {
+    renderizarPedidos(estadoPedidos.pedidos);
+    console.log(`✅ ${estadoPedidos.pedidos.length} pedidos carregados`);
+    
+    // ⭐ ATUALIZAR ESTATÍSTICAS NA TELA
+    atualizarEstatisticasNaTela(estadoPedidos.pedidos);
+    
+    // Log estatísticas (opcional - para o console)
+    logEstatisticasPedidos(estadoPedidos.pedidos);
+}
 
     } catch (error) {
         console.error('❌ Erro ao carregar pedidos:', error);
@@ -272,32 +320,141 @@ window.editarStatusPedido = async function(pedidoId) {
 };
 
 /**
- * Mostra modal para seleção de novo status
+ * Mostra modal para seleção de novo status - VERSÃO CORRIGIDA COM CSS INLINE
  */
 async function mostrarModalStatus(statusAtual) {
     return new Promise((resolve) => {
         const modal = document.createElement('div');
-        modal.className = 'modal';
+        modal.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            backdrop-filter: blur(5px);
+            font-family: 'Segoe UI', sans-serif;
+        `;
+
         modal.innerHTML = `
-            <div class="modal__content">
-                <h3>Alterar Status do Pedido</h3>
-                <p>Selecione o novo status:</p>
-                
-                <div class="status-options">
-                    ${PEDIDOS_CONFIG.STATUS_OPCOES.map(status => `
-                        <label class="status-option ${status === statusAtual ? 'status-option--active' : ''}">
-                            <input type="radio" name="status" value="${status}" 
-                                   ${status === statusAtual ? 'checked' : ''}>
-                            <span class="status-option__text">${status}</span>
-                        </label>
-                    `).join('')}
+            <div style="
+                background: linear-gradient(145deg, #ffffff, #f8f9fa);
+                padding: 30px;
+                border-radius: 20px;
+                box-shadow: 0 15px 50px rgba(0,0,0,0.15);
+                border: 3px solid #ffa502;
+                max-width: 500px;
+                width: 90%;
+                max-height: 80vh;
+                overflow-y: auto;
+            ">
+                <div style="
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                    padding-bottom: 15px;
+                    border-bottom: 2px solid #ffa502;
+                ">
+                    <h3 style="
+                        color: #2c3e50;
+                        font-size: 1.5rem;
+                        font-weight: 800;
+                        display: flex;
+                        align-items: center;
+                        gap: 10px;
+                        margin: 0;
+                    ">
+                        <i class="fas fa-edit"></i>
+                        Alterar Status do Pedido
+                    </h3>
                 </div>
                 
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" onclick="fecharModalStatus(null)">
+                <div style="margin-bottom: 25px;">
+                    <p style="margin-bottom: 20px; color: #2c3e50; font-weight: 600; font-size: 1.1rem;">
+                        Selecione o novo status:
+                    </p>
+                    
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        ${PEDIDOS_CONFIG.STATUS_OPCOES.map(status => `
+                            <label style="
+                                display: flex;
+                                align-items: center;
+                                gap: 15px;
+                                padding: 18px 20px;
+                                background: linear-gradient(145deg, #ffffff, #f8f9fa);
+                                border: 3px solid ${status === statusAtual ? '#2ed573' : '#bdc3c7'};
+                                border-radius: 12px;
+                                cursor: pointer;
+                                transition: all 0.3s ease;
+                                font-weight: 600;
+                                color: #2c3e50;
+                                ${status === statusAtual ? 'background: linear-gradient(135deg, #ffffff, rgba(46, 213, 115, 0.1)); box-shadow: 0 4px 15px rgba(0,0,0,0.1);' : ''}
+                            ">
+                                <input 
+                                    type="radio" 
+                                    name="status" 
+                                    value="${status}" 
+                                    ${status === statusAtual ? 'checked' : ''}
+                                    style="width: 20px; height: 20px; accent-color: #2ed573; cursor: pointer;"
+                                >
+                                <span style="font-size: 1.1rem; font-weight: 700; flex: 1; cursor: pointer;">
+                                    ${status}
+                                </span>
+                                ${status === statusAtual ? '<i class="fas fa-check" style="color: #2ed573;"></i>' : ''}
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div style="
+                    display: flex;
+                    justify-content: flex-end;
+                    gap: 15px;
+                    margin-top: 25px;
+                    padding-top: 20px;
+                    border-top: 1px solid rgba(0,0,0,0.1);
+                ">
+                    <button 
+                        type="button" 
+                        onclick="fecharModalStatus(null)" 
+                        style="
+                            background: #7f8c8d;
+                            color: white;
+                            border: 2px solid #7f8c8d;
+                            padding: 12px 24px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            font-weight: 700;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.background='#636e72'; this.style.borderColor='#636e72'"
+                        onmouseout="this.style.background='#7f8c8d'; this.style.borderColor='#7f8c8d'"
+                    >
                         Cancelar
                     </button>
-                    <button type="button" class="btn btn-primary" onclick="fecharModalStatus(document.querySelector('input[name=\"status\"]:checked')?.value)">
+                    <button 
+                        type="button" 
+                        onclick="fecharModalStatus(document.querySelector('input[name=\\'status\\']:checked')?.value)" 
+                        style="
+                            background: linear-gradient(135deg, #ff4757, #e8413d);
+                            color: white;
+                            border: 2px solid #e8413d;
+                            padding: 12px 24px;
+                            border-radius: 25px;
+                            cursor: pointer;
+                            font-weight: 700;
+                            font-size: 1rem;
+                            transition: all 0.3s ease;
+                        "
+                        onmouseover="this.style.background='linear-gradient(135deg, #e8413d, #c23616)'; this.style.borderColor='#c23616'"
+                        onmouseout="this.style.background='linear-gradient(135deg, #ff4757, #e8413d)'; this.style.borderColor='#e8413d'"
+                    >
                         Confirmar
                     </button>
                 </div>
@@ -305,18 +462,76 @@ async function mostrarModalStatus(statusAtual) {
         `;
 
         document.body.appendChild(modal);
-        modal.style.display = 'flex';
+
+        // Adicionar efeitos de hover aos itens
+        const statusOptions = modal.querySelectorAll('label');
+        statusOptions.forEach(option => {
+            option.addEventListener('mouseenter', function() {
+                if (!this.querySelector('input').checked) {
+                    this.style.transform = 'translateX(5px)';
+                    this.style.borderColor = '#ffa502';
+                }
+            });
+            
+            option.addEventListener('mouseleave', function() {
+                if (!this.querySelector('input').checked) {
+                    this.style.transform = 'translateX(0)';
+                    this.style.borderColor = '#bdc3c7';
+                }
+            });
+
+            // Clique para selecionar
+            option.addEventListener('click', function() {
+                const input = this.querySelector('input');
+                input.checked = true;
+                
+                // Remover seleção de outros
+                statusOptions.forEach(opt => {
+                    if (opt !== this) {
+                        opt.style.background = 'linear-gradient(145deg, #ffffff, #f8f9fa)';
+                        opt.style.borderColor = '#bdc3c7';
+                        opt.querySelector('i.fa-check')?.remove();
+                    }
+                });
+                
+                // Adicionar check ao selecionado
+                if (!this.querySelector('i.fa-check')) {
+                    this.style.background = 'linear-gradient(135deg, #ffffff, rgba(46, 213, 115, 0.1))';
+                    this.style.borderColor = '#2ed573';
+                    this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.1)';
+                    this.innerHTML += '<i class="fas fa-check" style="color: #2ed573;"></i>';
+                }
+            });
+        });
 
         window.fecharModalStatus = (resultado) => {
-            modal.remove();
+            if (modal.parentNode) {
+                modal.remove();
+            }
             window.fecharModalStatus = null;
             resolve(resultado);
         };
+
+        // Fechar modal ao clicar fora
+        modal.addEventListener('click', function(e) {
+            if (e.target === modal) {
+                fecharModalStatus(null);
+            }
+        });
+
+        // Fechar com ESC
+        const handleEsc = (e) => {
+            if (e.key === 'Escape') {
+                fecharModalStatus(null);
+                document.removeEventListener('keydown', handleEsc);
+            }
+        };
+        document.addEventListener('keydown', handleEsc);
     });
 }
 
 /**
- * Atualiza status do pedido no Supabase
+ * Atualiza status do pedido no Supabase - VERSÃO CORRIGIDA
  */
 async function atualizarStatusPedido(pedidoId, novoStatus) {
     try {
@@ -324,15 +539,24 @@ async function atualizarStatusPedido(pedidoId, novoStatus) {
         
         mostrarMensagemPedidos('Atualizando status...', 'info');
 
+        // Tenta atualizar apenas o status (sem atualizado_em)
         const { error } = await supabase
             .from('pedidos')
             .update({ 
-                status: novoStatus,
-                atualizado_em: new Date().toISOString()
+                status: novoStatus
+                // REMOVI: atualizado_em: new Date().toISOString()
             })
             .eq('id', pedidoId);
 
-        if (error) throw error;
+        if (error) {
+            // Se der erro, tenta sem nenhum campo extra
+            const { error: errorSimple } = await supabase
+                .from('pedidos')
+                .update({ status: novoStatus })
+                .eq('id', pedidoId);
+                
+            if (errorSimple) throw errorSimple;
+        }
 
         mostrarMensagemPedidos('Status atualizado com sucesso!', 'success');
         
@@ -368,6 +592,8 @@ async function atualizarInterfaceStatus(pedidoId, novoStatus) {
         // Efeito visual de atualização
         card.classList.add('status-updated');
         setTimeout(() => card.classList.remove('status-updated'), 1000);
+        // Atualizar estatísticas quando mudar o status
+        atualizarEstatisticasNaTela(estadoPedidos.pedidos);
     } else {
         // Fallback: recarregar pedidos
         await carregarPedidos();
@@ -640,13 +866,3 @@ function escapeHTML(texto) {
 window.addEventListener('beforeunload', () => {
     pararAutoRefresh();
 });
-
-// Debug helpers
-if (process.env.NODE_ENV === 'development') {
-    window.debugPedidos = {
-        getEstado: () => ({ ...estadoPedidos }),
-        forcarRecarregamento: () => carregarPedidos(),
-        simularErro: () => exibirErroCarregamento(new Error('Erro simulado')),
-        pararAutoRefresh: () => pararAutoRefresh()
-    };
-}

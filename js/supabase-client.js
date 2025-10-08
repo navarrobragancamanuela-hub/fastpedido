@@ -194,15 +194,9 @@ class MonitorSupabase {
     }
 
     notificarDegradacao() {
-        // Em uma aplicação real, aqui você poderia:
-        // - Enviar para um serviço de monitoramento
-        // - Mostrar alerta para o usuário
-        // - Tentar reconexão automática
-        
         console.warn('🚨 Serviço Supabase apresentando degradação');
         
         if (typeof window !== 'undefined') {
-            // Opcional: mostrar notificação não intrusiva para o usuário
             setTimeout(() => {
                 if (this.status === 'erro') {
                     this.mostrarNotificacaoDegradacao();
@@ -211,7 +205,7 @@ class MonitorSupabase {
         }
     }
 
-    mostrarNotificacionDegradacao() {
+    mostrarNotificacaoDegradacao() {
         const notification = document.createElement('div');
         notification.style.cssText = `
             position: fixed;
@@ -239,7 +233,6 @@ class MonitorSupabase {
 
         document.body.appendChild(notification);
 
-        // Auto-remover após 8 segundos
         setTimeout(() => {
             if (notification.parentNode) {
                 notification.style.opacity = '0';
@@ -304,7 +297,6 @@ class TratadorErrosSupabase {
     static tratarErro(error, contexto = 'Operação do Supabase') {
         console.error(`❌ ${contexto}:`, error);
 
-        // Mapeamento de erros comuns para mensagens amigáveis
         const mensagensErro = {
             'JWT': 'Erro de autenticação. Recarregue a página.',
             'Network': 'Erro de conexão. Verifique sua internet.',
@@ -343,7 +335,6 @@ class TratadorErrosSupabase {
                     throw error;
                 }
 
-                // Esperar antes da próxima tentativa (com backoff exponencial)
                 await new Promise(resolve => 
                     setTimeout(resolve, delay * Math.pow(2, tentativa - 1))
                 );
@@ -364,7 +355,6 @@ setTimeout(async () => {
     try {
         await monitorSupabase.verificarSaude();
         
-        // Verificação periódica a cada 2 minutos
         setInterval(() => {
             monitorSupabase.verificarSaude().catch(console.warn);
         }, 120000);
@@ -378,16 +368,6 @@ setTimeout(async () => {
 window.supabase = supabase;
 window.monitorSupabase = monitorSupabase;
 window.TratadorErrosSupabase = TratadorErrosSupabase;
-
-// Debug helpers para desenvolvimento
-if (process.env.NODE_ENV === 'development') {
-    window.debugSupabase = {
-        verificarConexao: () => verificarConexaoSupabase(),
-        getStatus: () => monitorSupabase.getStatus(),
-        forcarVerificacao: () => monitorSupabase.verificarSaude(),
-        simularErro: () => TratadorErrosSupabase.tratarErro(new Error('Erro simulado'))
-    };
-}
 
 console.log('🎯 Supabase Client refinado carregado com sucesso!');
 console.log('📋 Recursos disponíveis:');
