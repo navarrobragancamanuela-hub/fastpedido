@@ -64,6 +64,7 @@ const estadoPedidos = {
 // ===== INICIALIZAÇÃO =====
 document.addEventListener('DOMContentLoaded', async () => {
     await inicializarModuloPedidos();
+    inicializarFiltroStatus(); // ✅ ADICIONAR AQUI
 });
 
 /**
@@ -866,3 +867,54 @@ function escapeHTML(texto) {
 window.addEventListener('beforeunload', () => {
     pararAutoRefresh();
 });
+// ===== 🔍 FILTRO DE PEDIDOS POR STATUS =====
+/**
+ * Filtra pedidos por status - FUNÇÃO QUE ESTAVA FALTANDO
+ */
+function filtrarPedidosPorStatus(status) {
+    const cards = document.querySelectorAll('.pedido-card, .item-card');
+    let visiveis = 0;
+    
+    cards.forEach(card => {
+        const badge = card.querySelector('.badge');
+        if (badge) {
+            const cardStatus = badge.textContent.trim();
+            const deveMostrar = status === 'all' || cardStatus === status;
+            
+            card.style.display = deveMostrar ? 'block' : 'none';
+            if (deveMostrar) visiveis++;
+        }
+    });
+    
+    // Atualizar subtítulo
+    const subtitle = document.getElementById('pedidos-subtitle');
+    if (subtitle) {
+        if (status === 'all') {
+            subtitle.textContent = `${visiveis} pedidos encontrados`;
+        } else {
+            subtitle.textContent = `${visiveis} pedidos ${status.toLowerCase()}`;
+        }
+    }
+    
+    // Mostrar/ocultar estado vazio
+    const emptyState = document.getElementById('empty-state');
+    if (emptyState) {
+        emptyState.hidden = visiveis > 0;
+    }
+    
+    console.log(`🎯 Filtro aplicado: ${status} - ${visiveis} pedidos visíveis`);
+}
+
+// ===== 🎛️ CONFIGURAÇÃO DO FILTRO =====
+/**
+ * Inicializa o evento do filtro de status
+ */
+function inicializarFiltroStatus() {
+    const filtroSelect = document.getElementById('status-filter');
+    if (filtroSelect) {
+        filtroSelect.addEventListener('change', function() {
+            filtrarPedidosPorStatus(this.value);
+        });
+        console.log('✅ Filtro de status inicializado');
+    }
+}
