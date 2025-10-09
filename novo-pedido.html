@@ -18,6 +18,356 @@
           integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" 
           crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+
+/* ===== 🎨 FORMULÁRIOS PREMIUM - ESTILOS PARA NOVO PEDIDO ===== */
+
+.form-section {
+    background: var(--gradient-card);
+    padding: 30px;
+    border-radius: var(--radius-medium);
+    margin-bottom: 25px;
+    border: 2px solid var(--laranja-queijo);
+    box-shadow: var(--shadow-medium);
+    transition: var(--transition-smooth);
+}
+
+.form-section:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-bold);
+}
+
+.form-section__title {
+    color: var(--preto-carbon);
+    font-size: 1.4rem;
+    font-weight: 800;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid var(--laranja-queijo);
+}
+
+.form-section__icon {
+    color: var(--vermelho-burger);
+    font-size: 1.3rem;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-label {
+    display: block;
+    font-weight: 700;
+    color: var(--preto-carbon);
+    margin-bottom: 8px;
+    font-size: 1rem;
+}
+
+.form-label::after {
+    content: "*";
+    color: var(--vermelho-burger);
+    margin-left: 4px;
+}
+
+.form-label:has(~ .form-control:not([required]))::after {
+    content: "";
+}
+
+/* 🎯 INPUTS ESTILIZADOS */
+.form-control {
+    width: 100%;
+    padding: 14px 18px;
+    border: 2px solid var(--cinza-claro);
+    border-radius: var(--radius-medium);
+    background: var(--branco-gelo);
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--preto-carbon);
+    transition: var(--transition-smooth);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: var(--vermelho-burger);
+    box-shadow: 
+        inset 0 2px 4px rgba(0,0,0,0.05),
+        0 0 0 3px rgba(255, 71, 87, 0.1);
+    transform: translateY(-2px);
+}
+
+.form-control:hover {
+    border-color: var(--laranja-queijo);
+}
+
+.form-control--textarea {
+    resize: vertical;
+    min-height: 100px;
+    line-height: 1.5;
+}
+
+/* 🎯 SELECT ESTILIZADO */
+select.form-control {
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff4757'%3E%3Cpath d='M7 10l5 5 5-5z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 50px;
+}
+
+/* 🎯 ITENS DO PEDIDO ESTILIZADOS */
+.itens-container {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.item-pedido {
+    background: var(--gradient-card);
+    padding: 20px;
+    border-radius: var(--radius-medium);
+    border: 2px solid transparent;
+    transition: var(--transition-smooth);
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    box-shadow: var(--shadow-soft);
+}
+
+.item-pedido:hover {
+    border-color: var(--laranja-queijo);
+    transform: translateX(5px);
+    box-shadow: var(--shadow-medium);
+}
+
+.order-item__select {
+    flex: 2;
+    min-width: 0;
+}
+
+.order-item__input {
+    flex: 1;
+    min-width: 100px;
+    text-align: center;
+}
+
+.order-item__remove {
+    background: var(--vermelho-burger);
+    color: var(--branco-gelo);
+    border: none;
+    padding: 12px;
+    border-radius: var(--radius-small);
+    cursor: pointer;
+    transition: var(--transition-smooth);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 44px;
+    min-height: 44px;
+}
+
+.order-item__remove:hover {
+    background: var(--vermelho-salsa);
+    transform: scale(1.1);
+}
+
+.itens-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.itens-summary {
+    font-weight: 700;
+    color: var(--preto-carbon);
+    font-size: 1.1rem;
+}
+
+/* 🎯 BOTÕES DE FORMULÁRIO */
+.form-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 25px;
+    border-top: 2px solid var(--laranja-queijo);
+}
+
+.form-actions--sticky {
+    position: sticky;
+    bottom: 20px;
+    background: var(--gradient-card);
+    padding: 20px;
+    border-radius: var(--radius-medium);
+    box-shadow: var(--shadow-bold);
+    border: 2px solid var(--laranja-queijo);
+    z-index: 100;
+}
+
+.action-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+/* 🎯 PROGRESS BAR ESTILIZADA */
+.form-progress {
+    background: var(--gradient-card);
+    padding: 15px;
+    border-radius: var(--radius-medium);
+    margin: 20px 0;
+    border: 2px solid var(--laranja-queijo);
+}
+
+.form-progress__bar {
+    height: 8px;
+    background: rgba(0,0,0,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 10px 0;
+}
+
+.form-progress__fill {
+    height: 100%;
+    background: var(--gradient-burger);
+    border-radius: 4px;
+    transition: width 0.5s ease;
+    width: 0%;
+}
+
+.form-progress__text {
+    font-weight: 700;
+    color: var(--preto-carbon);
+    text-align: center;
+    display: block;
+}
+
+/* 🎯 ESTADOS DO FORMULÁRIO */
+.form-control--valid {
+    border-color: var(--verde-alface);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%232ed573'%3E%3Cpath d='M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 50px;
+}
+
+.form-control--invalid {
+    border-color: var(--vermelho-burger);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23ff4757'%3E%3Cpath d='M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 16px;
+    padding-right: 50px;
+}
+
+.form-feedback {
+    font-size: 0.85rem;
+    margin-top: 5px;
+    font-weight: 600;
+}
+
+.form-help {
+    font-size: 0.85rem;
+    color: var(--cinza-chic);
+    margin-top: 5px;
+}
+
+.char-counter {
+    font-weight: 700;
+}
+
+.char-counter--warning {
+    color: var(--vermelho-burger);
+}
+
+/* 🎯 BOTÃO EM PROCESSAMENTO */
+.btn--processing {
+    position: relative;
+    color: transparent !important;
+}
+
+.btn--processing::after {
+    content: "";
+    position: absolute;
+    width: 20px;
+    height: 20px;
+    top: 50%;
+    left: 50%;
+    margin-left: -10px;
+    margin-top: -10px;
+    border: 2px solid #ffffff;
+    border-radius: 50%;
+    border-right-color: transparent;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* 📱 RESPONSIVIDADE DOS FORMULÁRIOS */
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+    
+    .form-section {
+        padding: 20px;
+    }
+    
+    .item-pedido {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .order-item__select,
+    .order-item__input {
+        width: 100%;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .action-group {
+        justify-content: center;
+    }
+    
+    .itens-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+@media (max-width: 480px) {
+    .form-section {
+        padding: 15px;
+    }
+    
+    .form-control {
+        padding: 12px 15px;
+    }
+}
+
 /* ===== 🌟 CSS ULTRA PREMIUM V2 - TEMA RETRO LANCHONETE DELUXE 🌟 ===== */
 
 /* 🎨 PALETA DE CORES PREMIUM - ATUALIZADA */
