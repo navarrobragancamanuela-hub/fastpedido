@@ -604,3 +604,47 @@ function configurarEventListeners() {
 // ===== EXPORTAÇÕES GLOBAIS =====
 window.adicionarItem = adicionarItem;
 window.mostrarMensagem = mostrarMensagem;
+
+function mostrarResumo() {
+    console.log('🔍 Mostrando resumo...');
+    
+    const resumo = document.getElementById('pedido-summary');
+    const content = document.getElementById('summary-content');
+    
+    if (!resumo || !content) {
+        console.log('❌ Elementos não encontrados');
+        return;
+    }
+    
+    // Garantir que está visível
+    resumo.style.display = 'block';
+    resumo.hidden = false;
+    
+    // Preencher com dados
+    content.innerHTML = `
+        <div class="summary-item">
+            <strong>Cliente:</strong> <span>João Silva</span>
+        </div>
+        <div class="summary-item">
+            <strong>Status:</strong> <span style="background: #ffa502; color: white; padding: 4px 8px; border-radius: 5px;">Em preparo</span>
+        </div>
+        <div class="summary-item">
+            <strong>Itens do Pedido:</strong>
+            <div style="margin-top: 10px;">
+                <div style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #eee;">
+                    <span>1x Hambúrguer</span>
+                    <span>R$ 15,00</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; padding: 5px 0;">
+                    <span>2x Refrigerante</span>
+                    <span>R$ 10,00</span>
+                </div>
+            </div>
+        </div>
+        <div class="summary-total" style="background: linear-gradient(135deg, #ff4757, #ff6b6b); color: white; padding: 20px; border-radius: 10px; text-align: center; font-size: 1.3rem; font-weight: bold;">
+            <strong>Total: R$ 25,00</strong>
+        </div>
+    `;
+    
+    console.log('✅ Resumo atualizado e estilizado');
+}
