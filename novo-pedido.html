@@ -2044,6 +2044,79 @@ a.skip-link:focus {
 .modal > * {
   pointer-events: auto !important;
 }
+
+/* ESTILO BONITO PARA O RESUMO */
+.pedido-summary {
+    display: block !important;
+    background: linear-gradient(135deg, #ffffff, #f8f9fa);
+    padding: 25px;
+    border-radius: 15px;
+    border: 3px solid #ffa502;
+    margin: 25px 0;
+    box-shadow: 0 8px 25px rgba(255, 165, 2, 0.2);
+    color: #2c3e50 !important; /* Cor do texto */
+}
+
+.pedido-summary h3 {
+    color: #2c3e50 !important;
+    font-size: 1.4rem;
+    margin-bottom: 20px;
+    border-bottom: 2px solid #ffa502;
+    padding-bottom: 10px;
+}
+
+.summary-content {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.summary-content div {
+    background: rgba(255, 255, 255, 0.8);
+    padding: 15px;
+    border-radius: 10px;
+    border-left: 4px solid #ff4757;
+    color: #2c3e50 !important;
+}
+
+.summary-content strong {
+    color: #2c3e50 !important;
+    display: block;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.summary-content span {
+    color: #2c3e50 !important;
+}
+
+/* CENTRALIZAR OS ITENS DO RESUMO */
+.summary-item {
+    text-align: center !important;
+}
+
+.summary-item strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+}
+
+.summary-list__item {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    padding: 8px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+/* Ou se preferir alinhar à esquerda mas centralizado no bloco */
+.summary-content {
+    text-align: center;
+}
+
+.summary-content > div {
+    text-align: center;
+}
 </style>
 </head>
 
@@ -2318,9 +2391,7 @@ console.log('✅ Correções de funcionalidade carregadas!');
 </script>
 
 <body>
-    <!-- Skip link para acessibilidade -->
-    <a href="#main-content" class="skip-link">Pular para o conteúdo principal</a>
-    
+
     <div class="container">
         <!-- Cabeçalho -->
         <header class="header" role="banner">
@@ -2336,19 +2407,7 @@ console.log('✅ Correções de funcionalidade carregadas!');
                     Criar novo pedido
                 </p>
                 
-                <!-- Breadcrumb -->
-                <nav class="breadcrumb" aria-label="Navegação estrutural">
-                    <ol class="breadcrumb__list">
-                        <li class="breadcrumb__item">
-                            <a href="index.html" class="breadcrumb__link">Pedidos</a>
-                        </li>
-                        <li class="breadcrumb__item" aria-current="page">
-                            Novo Pedido
-                        </li>
-                    </ol>
-                </nav>
-            </div>
-        </header>
+               
 
         <!-- Navegação principal -->
         <nav class="nav" role="navigation" aria-label="Navegação principal">
@@ -2530,7 +2589,15 @@ console.log('✅ Correções de funcionalidade carregadas!');
                     </fieldset>
 
                     <!-- Resumo do Pedido -->
-                    <div class="pedido-summary" id="pedido-summary" aria-live="polite" hidden>
+                    <div class="pedido-summary" id="pedido-summary" aria-live="polite" style="display: block;">
+                      <h3 style="color: #2c3e50; font-size: 1.4rem; margin-bottom: 20px; border-bottom: 2px solid #ffa502; padding-bottom: 10px;">
+                          <i class="fas fa-receipt"></i>
+                          Resumo do Pedido
+                      </h3>
+                      <div class="summary-content" id="summary-content">
+                          <!-- O conteúdo será preenchido pelo JavaScript -->
+                      </div>
+                  </div>
                         <h3 class="summary-title">
                             <i class="fas fa-receipt" aria-hidden="true"></i>
                             Resumo do Pedido
@@ -2583,26 +2650,6 @@ console.log('✅ Correções de funcionalidade carregadas!');
                 </p>
             </div>
         </footer>
-    </div>
-
-    <!-- Modal de confirmação -->
-    <div id="confirm-modal" class="modal" role="dialog" aria-labelledby="confirm-title" aria-hidden="true">
-        <div class="modal__content">
-            <div class="modal__header">
-                <h3 id="confirm-title" class="modal__title">Confirmar Ação</h3>
-            </div>
-            <div class="modal__body">
-                <p id="confirm-message">Tem certeza que deseja prosseguir?</p>
-            </div>
-            <div class="modal__footer">
-                <button type="button" class="btn btn--secondary" id="confirm-cancel">
-                    Cancelar
-                </button>
-                <button type="button" class="btn btn--primary" id="confirm-ok">
-                    Confirmar
-                </button>
-            </div>
-        </div>
     </div>
 
     <!-- Scripts da aplicação -->
